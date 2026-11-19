@@ -90,6 +90,10 @@ h1,h2,h3,p{margin:0}
 @supports(height:100svh){.hero{min-height:620px}}
 .hero-media{position:absolute;inset:-6% 0 0;z-index:-2;will-change:transform;background:#3d4a5a}
 .hero-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 18%;filter:saturate(.9) contrast(1.04)}
+.hero-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%}
+@media(max-width:699px){.hero-media video{object-position:74% 50%}}
+.hero-still{display:none}
+.no-video .hero-still{display:block}
 @media(max-width:699px){.hero-media img{object-position:50% 30%}}
 .hero-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:40% center;
   filter:saturate(.88) contrast(1.05)}
@@ -99,8 +103,8 @@ h1,h2,h3,p{margin:0}
 /* Soft dark at the top so the headline reads on a pale dawn sky; dark at the foot for the CTA */
 .hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
   background:
-    linear-gradient(180deg,rgba(14,15,13,.66) 0%,rgba(14,15,13,.42) 26%,rgba(14,15,13,.12) 44%,rgba(14,15,13,0) 58%),
-    linear-gradient(0deg,rgba(14,15,13,.86) 0%,rgba(14,15,13,.5) 20%,rgba(14,15,13,0) 40%)}
+    linear-gradient(180deg,rgba(14,15,13,.5) 0%,rgba(14,15,13,.22) 26%,rgba(14,15,13,0) 44%),
+    linear-gradient(0deg,rgba(14,15,13,.72) 0%,rgba(14,15,13,.32) 22%,rgba(14,15,13,0) 42%)}
 .hero-sky{position:absolute;inset:0 0 auto;padding-top:clamp(86px,11vh,118px)}
 .hero .stamp{display:flex;gap:18px;color:var(--bone);opacity:.85;margin-bottom:12px}
 .hero h1{font-size:clamp(2.9rem,14.2vw,5.4rem);text-shadow:0 1px 30px rgba(14,15,13,.25)}
@@ -532,19 +536,23 @@ footer a:hover{color:var(--bone)}
 <!-- ================= HERO ================= -->
 <section class="hero" id="top" aria-labelledby="hero-title">
   <div class="hero-media" id="heroMedia" aria-hidden="true">
-    <!-- Hero photo (founder, Pyrenees, early light). To go back to video, swap this <picture> for:
-         <video id="heroVideo" autoplay muted loop playsinline preload="auto" poster="/media/hero.jpg">
-           <source src="/media/hero.webm" type="video/webm"><source src="/media/hero.mp4" type="video/mp4"></video> -->
-    <picture>
+    <!-- Hero: Pexels 3028398 (Social Sudo), aerial over fog, runner on the hill road.
+         11.5 s seamless loop (crossfade), graded, top cropped. Poster = first frame.
+         Fallback for reduced motion / Save-Data: founder photo below. -->
+    <picture class="hero-still">
       <source media="(max-width: 699px)" srcset="/media/hero-photo-m.webp">
-      <img src="/media/hero-photo.webp" alt="" width="1920" height="1395" fetchpriority="high" decoding="async">
+      <img src="/media/hero-photo.webp" alt="" width="1920" height="1395" decoding="async">
     </picture>
+    <video id="heroVideo" autoplay muted loop playsinline preload="auto" poster="/media/hero.jpg">
+      <source src="/media/hero.webm" type="video/webm">
+      <source src="/media/hero.mp4" type="video/mp4">
+    </video>
     <span class="hero-grain"></span>
   </div>
 
   <div class="hero-sky">
     <div class="wrap">
-      <p class="stamp label rv"><span>First light</span><span>Above the tree line</span></p>
+      <p class="stamp label rv"><span>First light</span><span>Into the fog</span></p>
       <h1 class="display rv d1" id="hero-title">175 km starts <span class="nb">on a <em>Tuesday.</em></span></h1>
     </div>
   </div>
@@ -575,8 +583,8 @@ footer a:hover{color:var(--bone)}
     <div class="grid">
       <h2 class="display rv" id="how-title">You bring <span class="it">the</span> legs.</h2>
       <figure class="legs rv d1">
-        <!-- Photo: Alin Serban / Pexels (free licence). Not the founder. -->
-        <img src="/media/legs.webp" alt="A runner climbing a forest trail, green undergrowth lit from above." width="1000" height="1250" loading="lazy" decoding="async">
+        <!-- Photo: Alin Serban / Pexels (free licence), runner climbing into fog. Not the founder. -->
+        <img src="/media/fog-climb.webp" alt="A runner with poles climbing a grass ridge into thick fog." width="1000" height="1250" loading="lazy" decoding="async">
       </figure>
       <p class="intro rv d1">It brings the season: what to run, when to rest, and what to do when life gets in the way.</p>
     </div>

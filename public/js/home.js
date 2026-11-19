@@ -26,7 +26,7 @@
   var v=document.getElementById('heroVideo');
   if(v){
     var saveData=navigator.connection&&navigator.connection.saveData;
-    if(reduce||saveData){v.removeAttribute('autoplay');v.pause();v.preload='none';v.remove()}
+    if(reduce||saveData){v.removeAttribute('autoplay');v.pause();v.preload='none';v.remove();document.querySelector('.hero-media').classList.add('no-video')}
     else{var p=v.play&&v.play();if(p&&p.catch)p.catch(function(){})}
   }
 

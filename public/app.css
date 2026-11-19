@@ -32,8 +32,8 @@ h1,h2,h3,p{margin:0}
 /* ---------- bar ---------- */
 .bar{position:sticky;top:0;z-index:20;background:rgba(14,15,13,.92);backdrop-filter:saturate(1.2) blur(8px);border-bottom:1px solid var(--rule)}
 .bar-in{max-width:1180px;margin:0 auto;padding:0 var(--pad);height:60px;display:flex;align-items:center;justify-content:space-between;gap:24px}
-.logo{font-family:var(--display);font-variation-settings:"wdth" 70;font-weight:800;font-size:1.1rem;text-transform:uppercase;letter-spacing:.02em;text-decoration:none;display:flex;align-items:center;gap:9px}
-.logo i{width:8px;height:8px;background:var(--signal);transform:rotate(45deg);display:block}
+.logo{font-family:var(--display);font-variation-settings:"wdth" 70;font-weight:800;font-size:1.15rem;text-transform:uppercase;letter-spacing:.02em;text-decoration:none;display:flex;align-items:baseline}
+.logo i{width:6px;height:6px;background:var(--signal);transform:rotate(45deg);display:inline-block;margin:0 4px;position:relative;top:3px}
 .tabs-top{display:none;gap:4px}
 .tabs-top a{font-family:var(--display);font-variation-settings:"wdth" 100;font-weight:600;font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;padding:10px 14px;color:var(--stone);border-bottom:2px solid transparent}
 .tabs-top a[aria-current="page"]{color:var(--bone);border-color:var(--signal)}

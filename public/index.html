@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Trail.AI — Trail and ultra plans that explain themselves</title>
+<title>Isard — Trail and ultra plans that explain themselves</title>
 <meta name="description" content="Trail and ultra training plans built around your race, your week and your watch. Every session tells you why.">
 <meta name="theme-color" content="#0E0F0D">
 <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/newsreader-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/fonts/fonts.css">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230E0F0D'/%3E%3Crect x='14' y='15' width='36' height='9' fill='%23ECE6DA'/%3E%3Crect x='27.5' y='15' width='9' height='35' fill='%23ECE6DA'/%3E%3Crect x='42' y='42' width='9' height='9' transform='rotate(45 46.5 46.5)' fill='%23F0602F'/%3E%3C/svg%3E">
+<link rel="icon" href="/img/isard-icon.svg" type="image/svg+xml">
 <style>
 /* ---------------------------------------------------------------
    System
@@ -74,9 +74,8 @@ h1,h2,h3,p{margin:0}
 /* ---------------- Nav ---------------- */
 .nav{position:absolute;inset:0 0 auto;z-index:20}
 .nav .wrap{display:flex;align-items:center;justify-content:space-between;height:76px}
-.logo{font-family:var(--display);font-variation-settings:"wdth" 70;font-weight:800;font-size:1.3rem;
-  letter-spacing:.02em;text-decoration:none;text-transform:uppercase;display:flex;align-items:baseline;gap:0}
-.logo i{width:7px;height:7px;background:var(--signal);display:inline-block;transform:rotate(45deg);margin:0 5px;position:relative;top:4px}
+.logo{display:inline-flex;align-items:center;color:inherit;text-decoration:none;line-height:0}
+.logo svg{height:24px;width:auto;display:block}
 .nav ul{display:none;list-style:none;margin:0;padding:0;gap:36px}
 .nav ul a{text-decoration:none;opacity:.82;transition:opacity .2s}
 .nav ul a:hover{opacity:1}
@@ -150,13 +149,11 @@ h1,h2,h3,p{margin:0}
 .t1 .tile-h h3{font-size:clamp(2.6rem,4.4vw,4.4rem)}}
 .t2{background:var(--signal);color:var(--ink)}
 .t3{color:var(--bone);min-height:480px;justify-content:space-between;background:#3b3a34}
-.t3 img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
-.t3::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(14,15,13,.62) 0%,rgba(14,15,13,.1) 45%,rgba(14,15,13,.35) 100%)}
+.t3 picture,.t3 img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:60% 50%;z-index:-2}
+.t3::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(14,15,13,.78) 0%,rgba(14,15,13,.35) 48%,rgba(14,15,13,.15) 70%,rgba(14,15,13,.45) 100%)}
 .ui{font-family:var(--display);font-variation-settings:"wdth" 100;border-radius:20px}
-.ui-mark{width:22px;height:22px;border-radius:6px;background:var(--ink);position:relative;flex:0 0 auto;display:block;overflow:hidden}
-.ui-mark::before{content:"";position:absolute;left:22%;right:22%;top:24%;height:15%;background:var(--bone)}
-.ui-mark::after{content:"";position:absolute;left:43%;width:14%;top:24%;bottom:22%;background:var(--bone);box-shadow:none}
-.ui-mark i{position:absolute;width:20%;height:20%;right:14%;bottom:16%;background:var(--signal);transform:rotate(45deg)}
+.ui-mark{width:24px;height:24px;flex:0 0 auto;display:block}
+.ui-mark img{width:100%;height:100%;display:block}
 .ui-goal{background:#F7F4EE;color:var(--ink);padding:22px;display:flex;flex-direction:column;gap:12px;box-shadow:0 30px 60px -30px rgba(0,0,0,.6);max-width:460px;width:100%;margin-top:auto}
 @media(min-width:900px){.ui-goal{margin-left:auto;transform:rotate(-1.2deg)}}
 .ui-title{display:flex;align-items:center;gap:10px;font-variation-settings:"wdth" 70;font-weight:800;font-size:1.25rem;text-transform:uppercase}
@@ -187,7 +184,7 @@ h1,h2,h3,p{margin:0}
 .lg-base::before{background:#3a3a35}.lg-build::before{background:var(--stone)}.lg-peak::before{background:var(--bone)}.lg-taper::before{background:#8DB38B}.lg-now::before{background:var(--signal)}
 .notifs{position:relative;margin-top:auto;padding-top:16px}
 .notif{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;background:rgba(246,243,237,.96);color:var(--ink);border-radius:20px;padding:14px 16px;font-family:var(--display);font-variation-settings:"wdth" 100;box-shadow:0 20px 40px -20px rgba(0,0,0,.6)}
-.notif .ui-mark{width:34px;height:34px;border-radius:9px}
+.notif .ui-mark{width:36px;height:36px}
 
 .notif b{display:block;font-size:.95rem}
 .notif p{margin:2px 0 0;font-family:var(--serif);font-size:.95rem;line-height:1.3;color:#3b3a35}
@@ -197,8 +194,8 @@ h1,h2,h3,p{margin:0}
 
 /* ---------------- Manifesto: still from the hero footage ---------------- */
 .manifesto{position:relative;min-height:100svh;display:flex;align-items:flex-start;overflow:hidden;isolation:isolate}
-.manifesto .media{position:absolute;inset:-8% 0;z-index:-2;background:#1e2533 url(/media/manifesto.jpg) 52% 60%/cover no-repeat;will-change:transform}
-@media(max-width:699px){.manifesto .media{background-image:url(/media/manifesto-m.jpg);background-position:50% 50%}}
+.manifesto .media{position:absolute;inset:-8% 0;z-index:-2;background:#1e2533 url(/media/manifesto.webp) 52% 60%/cover no-repeat;will-change:transform}
+@media(max-width:699px){.manifesto .media{background-image:url(/media/manifesto-m.webp);background-position:50% 50%}}
 .manifesto .media::after{content:"";position:absolute;inset:0;opacity:.14;mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 .manifesto::after{content:"";position:absolute;inset:0;z-index:-1;
@@ -300,8 +297,9 @@ h1,h2,h3,p{margin:0}
 .ios-status svg{display:block;height:2.9cqw;width:auto;fill:currentColor}
 .ios-status svg.bat{height:3.05cqw}
 .app-top{display:flex;justify-content:space-between;align-items:center;margin-top:1.4cqw}
-.wordmark{font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 70;font-weight:800;text-transform:uppercase;font-size:4.3cqw;letter-spacing:.02em;display:flex;align-items:center}
-.wordmark i{display:inline-block;width:1.45cqw;height:1.45cqw;background:var(--a-accent);transform:rotate(45deg);margin:0 1cqw;position:relative;top:.55cqw}
+.wordmark{font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 70;font-weight:800;text-transform:uppercase;font-size:4.6cqw;letter-spacing:.03em;display:flex;align-items:center}
+.wordmark{gap:1.6cqw}
+.wordmark .sym{height:5cqw;width:auto;display:block}
 .avatar{width:8.4cqw;height:8.4cqw;border-radius:50%;background:var(--a-surf2);display:grid;place-items:center;font-weight:600;font-size:3.6cqw;color:var(--a-text)}
 .app-head{margin:4.2cqw 0 3.4cqw}
 .app-head.with-ring{display:flex;justify-content:space-between;align-items:flex-end}
@@ -402,6 +400,15 @@ h1,h2,h3,p{margin:0}
 
 .product{background:var(--paper)}
 
+/* ---------------- Interlude ---------------- */
+.mono{position:relative;min-height:88svh;display:flex;align-items:center;overflow:hidden;isolation:isolate;background:#151515;color:#F4F2EE}
+.mono picture,.mono img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.mono::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(0,0,0,.55),rgba(0,0,0,.05) 60%)}
+.mono::after{content:"";position:absolute;inset:0;z-index:-1;opacity:.1;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.mono-q{font-family:var(--display);font-variation-settings:"wdth" 62;font-weight:800;text-transform:uppercase;font-size:clamp(2.8rem,6.4vw,6rem);line-height:.9;max-width:13ch}
+.mono-q span{color:rgba(244,242,238,.55)}
+
 /* ---------------- Credibility: the bib ---------------- */
 .cred{padding-bottom:clamp(80px,12vw,170px);overflow:hidden}
 .why-text{grid-column:1 / -1}
@@ -435,7 +442,11 @@ h1,h2,h3,p{margin:0}
 .bib-foot .bar{height:30px;width:120px;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 4px,var(--ink) 4px 5px,transparent 5px 8px,var(--ink) 8px 11px,transparent 11px 12px)}
 .bib-foot .st{font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--signal)}
 .honest{grid-column:1 / -1;margin-top:clamp(64px,8vw,110px);border-top:1px solid var(--rule-d);padding-top:28px}
-.honest .grid{row-gap:28px}
+.honest{display:grid;gap:32px}
+.honest-ph{margin:0}
+.honest-ph img{width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;display:block;border-radius:4px}
+.honest-list{display:grid;gap:28px;align-content:center}
+.honest-list .item{border-top:1px solid var(--rule-d);padding-top:18px}
 .honest .item{grid-column:1 / -1}
 .honest .item b{display:block;font-family:var(--display);font-variation-settings:"wdth" 62;font-weight:800;font-size:3.2rem;line-height:.9;text-transform:uppercase}
 .honest .item p{margin-top:10px;color:var(--stone);font-size:1rem;max-width:30ch}
@@ -445,13 +456,14 @@ h1,h2,h3,p{margin:0}
   .why-visual{grid-column:7 / span 6;margin-top:clamp(64px,8vw,120px);align-self:start;padding-bottom:150px}
   .why-photo{width:72%;margin-left:auto}
   .why-visual .bib{position:absolute;left:0;bottom:0;margin:0;width:330px}
-  .honest .item{grid-column:span 4}
+  .honest{grid-template-columns:5fr 7fr;gap:clamp(40px,6vw,96px);align-items:center}
+  .honest-ph{max-width:460px}
 }
 
 /* ---------------- Join ---------------- */
 .join{position:relative;isolation:isolate;min-height:100svh;display:flex;flex-direction:column;color:var(--bone);
-  background:#1c2534 url(/media/join.jpg) 55% 30%/cover no-repeat;padding:clamp(20px,3vw,32px) 0 clamp(56px,8vw,110px)}
-@media(max-width:699px){.join{background-image:url(/media/join-m.jpg);background-position:50% 30%}}
+  background:#1c2534 url(/media/join.webp) 55% 30%/cover no-repeat;padding:clamp(20px,3vw,32px) 0 clamp(56px,8vw,110px)}
+@media(max-width:699px){.join{background-image:url(/media/join-m.webp);background-position:50% 30%}}
 .join::before{content:"";position:absolute;inset:0;z-index:-1;
   background:linear-gradient(180deg,rgba(14,15,13,.55) 0%,rgba(14,15,13,.15) 30%,rgba(14,15,13,0) 45%,rgba(14,15,13,.55) 70%,rgba(14,15,13,.9) 100%)}
 .join>.wrap{flex:1;display:flex;flex-direction:column}
@@ -504,7 +516,7 @@ footer a:hover{color:var(--bone)}
 
 <header class="nav">
   <div class="wrap">
-    <a class="logo" href="#top" aria-label="Trail.AI home">Trail<i aria-hidden="true"></i>AI</a>
+    <a class="logo" href="#top" aria-label="Isard, home"><svg viewBox="34 56 420 116" aria-hidden="true" focusable="false"><g fill="currentColor"><path d="M40.00,166.00 C43.48,140.00 46.92,112.00 51.52,92.00 C55.20,76.00 65.04,68.00 76.08,70.00 C86.12,72.00 91.32,82.00 90.72,102.00 C86.50,91.00 81.40,86.00 75.42,87.00 C69.44,88.00 67.60,96.00 66.80,106.00 C65.20,126.00 63.60,146.00 62.00,166.00 Z M76.00,160.00 C81.04,134.00 86.16,106.00 91.96,86.00 C96.60,70.00 106.92,62.00 117.84,64.00 C127.76,66.00 132.36,76.00 130.56,96.00 C127.00,85.00 122.20,80.00 116.16,81.00 C110.12,82.00 107.80,90.00 106.40,100.00 C103.60,120.00 100.80,140.00 98.00,160.00 Z"/><path d="M173.632 158.464V71.93599999999999Q173.632 71.29599999999999 174.07999999999998 70.84799999999998Q174.528 70.39999999999999 175.168 70.39999999999999H190.144Q190.784 70.39999999999999 191.232 70.84799999999998Q191.68 71.29599999999999 191.68 71.93599999999999V158.464Q191.68 159.104 191.232 159.55200000000002Q190.784 160.0 190.144 160.0H175.168Q174.528 160.0 174.07999999999998 159.55200000000002Q173.632 159.104 173.632 158.464Z M203.84 137.6V133.888Q203.84 133.248 204.288 132.8Q204.736 132.352 205.376 132.352H220.096Q220.736 132.352 221.184 132.8Q221.632 133.248 221.632 133.888V136.704Q221.632 140.672 223.68 143.10399999999998Q225.728 145.536 228.8 145.536Q231.872 145.536 233.92000000000002 143.232Q235.96800000000002 140.928 235.96800000000002 137.216Q235.96800000000002 133.376 233.40800000000002 130.624Q230.848 127.872 223.424 122.49600000000001Q217.024 117.888 213.05599999999998 114.304Q209.088 110.72 206.272 105.472Q203.456 100.22399999999999 203.456 93.312Q203.456 82.432 210.24 75.904Q217.024 69.376 228.16 69.376Q239.424 69.376 246.272 76.16Q253.12 82.944 253.12 93.952V97.024Q253.12 97.664 252.672 98.112Q252.224 98.56 251.584 98.56H236.864Q236.224 98.56 235.776 98.112Q235.328 97.664 235.328 97.024V93.568Q235.328 89.6 233.344 87.232Q231.36 84.864 228.16 84.864Q225.088 84.864 223.168 87.104Q221.248 89.344 221.248 93.312Q221.248 97.152 223.68 100.096Q226.112 103.03999999999999 233.28 108.288Q241.216 114.176 245.248 117.82400000000001Q249.28 121.47200000000001 251.51999999999998 125.888Q253.76 130.304 253.76 136.448Q253.76 147.712 246.848 154.368Q239.936 161.024 228.672 161.024Q221.248 161.024 215.61599999999999 158.07999999999998Q209.984 155.136 206.912 149.824Q203.84 144.512 203.84 137.6Z M300.992 158.592 298.944 146.304Q298.944 145.664 298.176 145.664H281.92Q281.152 145.664 281.152 146.304L279.104 158.592Q278.976 160.0 277.44 160.0H262.464Q260.8 160.0 261.18399999999997 158.336L280.0 71.80799999999999Q280.256 70.39999999999999 281.664 70.39999999999999H298.944Q300.352 70.39999999999999 300.608 71.80799999999999L319.296 158.336L319.424 158.848Q319.424 160.0 318.016 160.0H302.656Q301.12 160.0 300.992 158.592ZM284.224 131.712H295.744Q296.384 131.712 296.256 131.072L290.24 96.128Q290.11199999999997 95.744 289.856 95.744Q289.6 95.744 289.472 96.128L283.712 131.072Q283.712 131.712 284.224 131.712Z M362.81600000000003 158.72 352.96000000000004 123.392Q352.704 122.88 352.32000000000005 122.88H347.968Q347.32800000000003 122.88 347.32800000000003 123.52V158.464Q347.32800000000003 159.104 346.88 159.55200000000002Q346.432 160.0 345.79200000000003 160.0H330.81600000000003Q330.17600000000004 160.0 329.72800000000007 159.55200000000002Q329.28000000000003 159.104 329.28000000000003 158.464V71.93599999999999Q329.28000000000003 71.29599999999999 329.72800000000007 70.84799999999998Q330.17600000000004 70.39999999999999 330.81600000000003 70.39999999999999H356.672Q363.71200000000005 70.39999999999999 369.216 73.792Q374.72 77.184 377.72800000000007 83.328Q380.73600000000005 89.472 380.73600000000005 97.408Q380.73600000000005 104.96000000000001 377.856 110.72Q374.976 116.47999999999999 369.856 119.68Q369.6 119.80799999999999 369.47200000000004 120.0Q369.34400000000005 120.19200000000001 369.47200000000004 120.44800000000001L381.24800000000005 158.208L381.37600000000003 158.72Q381.37600000000003 160.0 379.968 160.0H364.608Q363.20000000000005 160.0 362.81600000000003 158.72ZM347.32800000000003 86.52799999999999V108.416Q347.32800000000003 109.056 347.968 109.056H353.728Q357.696 109.056 360.192 105.91999999999999Q362.68800000000005 102.78399999999999 362.68800000000005 97.536Q362.68800000000005 92.16 360.192 89.024Q357.696 85.888 353.728 85.888H347.968Q347.32800000000003 85.888 347.32800000000003 86.52799999999999Z M392.12800000000004 158.464V71.93599999999999Q392.12800000000004 71.29599999999999 392.576 70.84799999999998Q393.02400000000006 70.39999999999999 393.66400000000004 70.39999999999999H416.83200000000005Q428.48 70.39999999999999 435.52000000000004 77.184Q442.56000000000006 83.968 442.56000000000006 95.232V135.168Q442.56000000000006 146.432 435.52000000000004 153.216Q428.48 160.0 416.83200000000005 160.0H393.66400000000004Q393.02400000000006 160.0 392.576 159.55200000000002Q392.12800000000004 159.104 392.12800000000004 158.464ZM410.81600000000003 144.512 416.576 144.38400000000001Q420.03200000000004 144.256 422.208 141.44Q424.384 138.624 424.51200000000006 134.016V96.384Q424.51200000000006 91.52 422.336 88.70400000000001Q420.16 85.888 416.44800000000004 85.888H410.81600000000003Q410.17600000000004 85.888 410.17600000000004 86.52799999999999V143.872Q410.17600000000004 144.512 410.81600000000003 144.512Z"/></g></svg></a>
     <nav aria-label="Primary">
       <ul>
         <li><a class="label" href="#how">How it works</a></li>
@@ -524,8 +536,8 @@ footer a:hover{color:var(--bone)}
          <video id="heroVideo" autoplay muted loop playsinline preload="auto" poster="/media/hero.jpg">
            <source src="/media/hero.webm" type="video/webm"><source src="/media/hero.mp4" type="video/mp4"></video> -->
     <picture>
-      <source media="(max-width: 699px)" srcset="/media/hero-photo-m.jpg">
-      <img src="/media/hero-photo.jpg" alt="" width="1920" height="1395" fetchpriority="high" decoding="async">
+      <source media="(max-width: 699px)" srcset="/media/hero-photo-m.webp">
+      <img src="/media/hero-photo.webp" alt="" width="1920" height="1395" fetchpriority="high" decoding="async">
     </picture>
     <span class="hero-grain"></span>
   </div>
@@ -564,7 +576,7 @@ footer a:hover{color:var(--bone)}
       <h2 class="display rv" id="how-title">You bring <span class="it">the</span> legs.</h2>
       <figure class="legs rv d1">
         <!-- Photo: Alin Serban / Pexels (free licence). Not the founder. -->
-        <img src="/media/legs.jpg" alt="A runner climbing a forest trail, green undergrowth lit from above." width="1000" height="1250" loading="lazy" decoding="async">
+        <img src="/media/legs.webp" alt="A runner climbing a forest trail, green undergrowth lit from above." width="1000" height="1250" loading="lazy" decoding="async">
       </figure>
       <p class="intro rv d1">It brings the season: what to run, when to rest, and what to do when life gets in the way.</p>
     </div>
@@ -574,7 +586,7 @@ footer a:hover{color:var(--bone)}
         <header class="tile-h"><span class="tn">01 · Week 0</span><h3>Tell it the race. And your real week.</h3>
           <p>The race, the date, the days you can actually run. Old injuries, if you have them. Two minutes, then you have a season.</p></header>
         <div class="ui ui-goal" aria-hidden="true">
-          <div class="ui-title"><span class="ui-mark"><i></i></span>Set your goal</div>
+          <div class="ui-title"><span class="ui-mark"><img src="/img/isard-icon.svg" alt=""></span>Set your goal</div>
           <div class="ui-field"><span>Race</span><b>Ultra Marin</b></div>
           <div class="ui-3"><div class="ui-field"><span>Date</span><b>26 Jun 2027</b></div><div class="ui-field"><span>Distance</span><b>175 km</b></div><div class="ui-field"><span>Climbing</span><b>1,430 m</b></div></div>
           <span class="ui-l">Run days</span><div class="pills"><i class="">M</i><i class="on">T</i><i class="">W</i><i class="on">T</i><i class="">F</i><i class="on">S</i><i class="">S</i></div>
@@ -593,12 +605,12 @@ footer a:hover{color:var(--bone)}
         </div>
       </article>
       <article class="tile t3 rv d2">
-        <img src="/media/alpenglow.jpg" alt="" loading="lazy" decoding="async" width="1200" height="1600">
+        <picture><source media="(max-width: 699px)" srcset="/media/mud-m.webp"><img src="/media/mud.webp" alt="" loading="lazy" decoding="async" width="1600" height="1255"></picture>
         <header class="tile-h"><span class="tn">03 · Any week</span><h3>Life happens. The plan moves.</h3>
           <p>Miss a day, drag it. The week rearranges itself and keeps your rules.</p></header>
         <div class="notifs" aria-hidden="true">
-          <div class="notif back"><span class="ui-mark"><i></i></span><div><b>Trail.AI</b><p>Thursday: easy 50 min. You can talk.</p></div><em>7:02</em></div>
-          <div class="notif"><span class="ui-mark"><i></i></span><div><b>Moved to Sunday</b><p>No run on Monday, so your rule holds.</p></div><em>now</em></div>
+          <div class="notif back"><span class="ui-mark"><img src="/img/isard-icon.svg" alt=""></span><div><b>Isard</b><p>Thursday: easy 50 min. You can talk.</p></div><em>7:02</em></div>
+          <div class="notif"><span class="ui-mark"><img src="/img/isard-icon.svg" alt=""></span><div><b>Moved to Sunday</b><p>No run on Monday, so your rule holds.</p></div><em>now</em></div>
         </div>
       </article>
     </div>
@@ -650,7 +662,7 @@ footer a:hover{color:var(--bone)}
           <div class="iphone" data-theme="daylight" role="img" aria-label="Today screen: a 3 hour 20 long run on trail, easy effort, with the reason for the session.">
       <span class="hw l action"></span><span class="hw l volup"></span><span class="hw l voldn"></span><span class="hw r power"></span><span class="hw r cam"></span>
       <div class="iphone-bezel"><div class="iphone-glass"><div class="ios-screen"><div class="ios-status"><span class="time">9:41</span><span class="icons" aria-hidden="true"><svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.6" width="3" height="6.4" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 16 12" style="fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round"><path d="M.93 4.43A10 10 0 0 1 15.07 4.43"/><path d="M3.33 6.83A6.6 6.6 0 0 1 12.67 6.83"/><path d="M5.74 9.24A3.2 3.2 0 0 1 10.26 9.24"/><circle cx="8" cy="11.1" r=".9" style="fill:currentColor;stroke:none"/></svg><svg class="bat" viewBox="0 0 27 13"><rect x=".6" y=".6" width="23" height="11.8" rx="3.8" style="fill:none;stroke:currentColor;stroke-opacity:.38;stroke-width:1.1"/><rect x="2.4" y="2.4" width="17.6" height="8.2" rx="2.2"/><path d="M25 4.6c.9.2 1.5 1 1.5 1.9s-.6 1.7-1.5 1.9z" style="opacity:.45"/></svg></span></div>
-      <div class="app-top"><span class="wordmark">Trail<i></i>AI</span><span class="avatar">J</span></div>
+      <div class="app-top"><span class="wordmark"><svg class="sym" viewBox="100 108 312 344" aria-hidden="true"><path fill="currentColor" d="M112.00,443.20 C123.14,360.00 134.14,270.40 148.86,206.40 C160.64,155.20 192.13,129.60 227.46,136.00 C259.58,142.40 276.22,174.40 274.30,238.40 C260.80,203.20 244.48,187.20 225.34,190.40 C206.21,193.60 200.32,219.20 197.76,251.20 C192.64,315.20 187.52,379.20 182.40,443.20 Z M227.20,424.00 C243.33,340.80 259.71,251.20 278.27,187.20 C293.12,136.00 326.14,110.40 361.09,116.80 C392.83,123.20 407.55,155.20 401.79,219.20 C390.40,184.00 375.04,168.00 355.71,171.20 C336.38,174.40 328.96,200.00 324.48,232.00 C315.52,296.00 306.56,360.00 297.60,424.00 Z"/></svg>Isard</span><span class="avatar">J</span></div>
       <div class="app-head"><span class="eyebrow">Saturday 21 June</span><h4>Today</h4></div>
       <div class="hero-card">
         <div class="hc-top"><span class="chip">Long run</span><span class="hc-wk">Week 14 · Build</span></div>
@@ -672,7 +684,7 @@ footer a:hover{color:var(--bone)}
           <div class="iphone" data-theme="daylight" role="img" aria-label="Week screen: seven days, one strength session being moved to Sunday, with a confirmation that the rule holds.">
       <span class="hw l action"></span><span class="hw l volup"></span><span class="hw l voldn"></span><span class="hw r power"></span><span class="hw r cam"></span>
       <div class="iphone-bezel"><div class="iphone-glass"><div class="ios-screen"><div class="ios-status"><span class="time">9:41</span><span class="icons" aria-hidden="true"><svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.6" width="3" height="6.4" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 16 12" style="fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round"><path d="M.93 4.43A10 10 0 0 1 15.07 4.43"/><path d="M3.33 6.83A6.6 6.6 0 0 1 12.67 6.83"/><path d="M5.74 9.24A3.2 3.2 0 0 1 10.26 9.24"/><circle cx="8" cy="11.1" r=".9" style="fill:currentColor;stroke:none"/></svg><svg class="bat" viewBox="0 0 27 13"><rect x=".6" y=".6" width="23" height="11.8" rx="3.8" style="fill:none;stroke:currentColor;stroke-opacity:.38;stroke-width:1.1"/><rect x="2.4" y="2.4" width="17.6" height="8.2" rx="2.2"/><path d="M25 4.6c.9.2 1.5 1 1.5 1.9s-.6 1.7-1.5 1.9z" style="opacity:.45"/></svg></span></div>
-      <div class="app-top"><span class="wordmark">Trail<i></i>AI</span><span class="avatar">J</span></div>
+      <div class="app-top"><span class="wordmark"><svg class="sym" viewBox="100 108 312 344" aria-hidden="true"><path fill="currentColor" d="M112.00,443.20 C123.14,360.00 134.14,270.40 148.86,206.40 C160.64,155.20 192.13,129.60 227.46,136.00 C259.58,142.40 276.22,174.40 274.30,238.40 C260.80,203.20 244.48,187.20 225.34,190.40 C206.21,193.60 200.32,219.20 197.76,251.20 C192.64,315.20 187.52,379.20 182.40,443.20 Z M227.20,424.00 C243.33,340.80 259.71,251.20 278.27,187.20 C293.12,136.00 326.14,110.40 361.09,116.80 C392.83,123.20 407.55,155.20 401.79,219.20 C390.40,184.00 375.04,168.00 355.71,171.20 C336.38,174.40 328.96,200.00 324.48,232.00 C315.52,296.00 306.56,360.00 297.60,424.00 Z"/></svg>Isard</span><span class="avatar">J</span></div>
       <div class="app-head with-ring"><div><span class="eyebrow">Week 14 of 31 · Build</span><h4>This week</h4></div><div class="ring-wrap"><svg class="ring" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="26" class="ring-bg"/><circle cx="32" cy="32" r="26" class="ring-fg" stroke-dasharray="87.3 163.4"/></svg><span><b>53%</b></span></div></div>
       <div class="wlist"><div class="wrow done t-str"><span class="wr-d">Mon</span><span class="wr-s"><b>Strength · legs</b><small>40 min</small></span><span class="wr-st"><svg viewBox="0 0 20 20"><circle class="ok-dot" cx="10" cy="10" r="10"/><path class="ok-tick" d="M6 10.4 8.8 13 14 7.4"/></svg></span></div><div class="wrow done t-run"><span class="wr-d">Tue</span><span class="wr-s"><b>Hills 8 × 3 min</b><small>A few words at a time</small></span><span class="wr-st"><svg viewBox="0 0 20 20"><circle class="ok-dot" cx="10" cy="10" r="10"/><path class="ok-tick" d="M6 10.4 8.8 13 14 7.4"/></svg></span></div><div class="wrow  t-rest"><span class="wr-d">Wed</span><span class="wr-s"><b>Rest</b><small>Bike commute only</small></span><span class="wr-st"></span></div><div class="wrow done t-run"><span class="wr-d">Thu</span><span class="wr-s"><b>Easy 50 min</b><small>You can talk</small></span><span class="wr-st"><svg viewBox="0 0 20 20"><circle class="ok-dot" cx="10" cy="10" r="10"/><path class="ok-tick" d="M6 10.4 8.8 13 14 7.4"/></svg></span></div><div class="wrow drag t-str"><span class="wr-d">Fri</span><span class="wr-s"><b>Strength · legs</b><small>Moving to Sunday</small></span><span class="wr-st">Drag</span></div><div class="wrow today t-run"><span class="wr-d">Sat</span><span class="wr-s"><b>Long run 3:20</b><small>Today</small></span><span class="wr-st"></span></div><div class="wrow  t-rest"><span class="wr-d">Sun</span><span class="wr-s"><b>Rest</b><small>Walk if you like</small></span><span class="wr-st"></span></div></div>
       <div class="toast-ok"><svg viewBox="0 0 20 20"><circle class="ok-dot" cx="10" cy="10" r="10"/><path class="ok-tick" d="M6 10.4 8.8 13 14 7.4"/></svg>Sunday works: no run on Monday, so your rule holds.</div>
@@ -685,7 +697,7 @@ footer a:hover{color:var(--bone)}
           <div class="iphone" data-theme="daylight" role="img" aria-label="Progress screen: four stat tiles and the season as weekly bars, current week highlighted.">
       <span class="hw l action"></span><span class="hw l volup"></span><span class="hw l voldn"></span><span class="hw r power"></span><span class="hw r cam"></span>
       <div class="iphone-bezel"><div class="iphone-glass"><div class="ios-screen"><div class="ios-status"><span class="time">9:41</span><span class="icons" aria-hidden="true"><svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.6" width="3" height="6.4" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 16 12" style="fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round"><path d="M.93 4.43A10 10 0 0 1 15.07 4.43"/><path d="M3.33 6.83A6.6 6.6 0 0 1 12.67 6.83"/><path d="M5.74 9.24A3.2 3.2 0 0 1 10.26 9.24"/><circle cx="8" cy="11.1" r=".9" style="fill:currentColor;stroke:none"/></svg><svg class="bat" viewBox="0 0 27 13"><rect x=".6" y=".6" width="23" height="11.8" rx="3.8" style="fill:none;stroke:currentColor;stroke-opacity:.38;stroke-width:1.1"/><rect x="2.4" y="2.4" width="17.6" height="8.2" rx="2.2"/><path d="M25 4.6c.9.2 1.5 1 1.5 1.9s-.6 1.7-1.5 1.9z" style="opacity:.45"/></svg></span></div>
-      <div class="app-top"><span class="wordmark">Trail<i></i>AI</span><span class="avatar">J</span></div>
+      <div class="app-top"><span class="wordmark"><svg class="sym" viewBox="100 108 312 344" aria-hidden="true"><path fill="currentColor" d="M112.00,443.20 C123.14,360.00 134.14,270.40 148.86,206.40 C160.64,155.20 192.13,129.60 227.46,136.00 C259.58,142.40 276.22,174.40 274.30,238.40 C260.80,203.20 244.48,187.20 225.34,190.40 C206.21,193.60 200.32,219.20 197.76,251.20 C192.64,315.20 187.52,379.20 182.40,443.20 Z M227.20,424.00 C243.33,340.80 259.71,251.20 278.27,187.20 C293.12,136.00 326.14,110.40 361.09,116.80 C392.83,123.20 407.55,155.20 401.79,219.20 C390.40,184.00 375.04,168.00 355.71,171.20 C336.38,174.40 328.96,200.00 324.48,232.00 C315.52,296.00 306.56,360.00 297.60,424.00 Z"/></svg>Isard</span><span class="avatar">J</span></div>
       <div class="app-head"><span class="eyebrow">Last 12 weeks</span><h4>Progress</h4></div>
       <div class="ptiles"><div class="ptile"><span>This week</span><b>7:10</b><small>h planned</small><svg viewBox="0 0 100 32" preserveAspectRatio="none" aria-hidden="true"><path d="M0.0 22.2 L14.3 19.6 L28.6 18.3 L42.9 22.2 L57.1 17.0 L71.4 15.7 L85.7 14.4 L100.0 13.9"/></svg></div><div class="ptile"><span>Truly easy</span><b>81%</b><small>of running</small><svg viewBox="0 0 100 32" preserveAspectRatio="none" aria-hidden="true"><path d="M0.0 14.4 L14.3 11.8 L28.6 13.1 L42.9 10.5 L57.1 9.2 L71.4 9.7 L85.7 8.7 L100.0 8.9"/></svg></div><div class="ptile"><span>Longest run</span><b>3:20</b><small>h · today</small><svg viewBox="0 0 100 32" preserveAspectRatio="none" aria-hidden="true"><path d="M0.0 24.8 L14.3 23.5 L28.6 22.2 L42.9 24.8 L57.1 20.9 L71.4 19.6 L85.7 18.3 L100.0 17.0"/></svg></div><div class="ptile"><span>Climbing</span><b>1,940</b><small>m per week</small><svg viewBox="0 0 100 32" preserveAspectRatio="none" aria-hidden="true"><path d="M0.0 22.2 L14.3 20.9 L28.6 17.0 L42.9 22.2 L57.1 15.7 L71.4 14.4 L85.7 14.9 L100.0 11.8"/></svg></div></div>
       <div class="pchart"><div class="sec-t"><span>The season</span><span class="muted">week 14 of 31</span></div><svg viewBox="0 0 300 92" preserveAspectRatio="none" aria-hidden="true"><rect class="b-base" x="1.5" y="50.1" width="6.6" height="41.9" rx="1.5"/><rect class="b-base" x="11.2" y="47.9" width="6.6" height="44.1" rx="1.5"/><rect class="b-base" x="20.9" y="45.8" width="6.6" height="46.2" rx="1.5"/><rect class="b-base" x="30.6" y="56.5" width="6.6" height="35.5" rx="1.5"/><rect class="b-base" x="40.3" y="44.7" width="6.6" height="47.3" rx="1.5"/><rect class="b-base" x="49.9" y="40.4" width="6.6" height="51.6" rx="1.5"/><rect class="b-base" x="59.6" y="39.3" width="6.6" height="52.7" rx="1.5"/><rect class="b-base" x="69.3" y="52.2" width="6.6" height="39.8" rx="1.5"/><rect class="b-base" x="79.0" y="36.1" width="6.6" height="55.9" rx="1.5"/><rect class="b-base" x="88.6" y="35.0" width="6.6" height="57.0" rx="1.5"/><rect class="b-base" x="98.3" y="32.9" width="6.6" height="59.1" rx="1.5"/><rect class="b-base" x="108.0" y="49.0" width="6.6" height="43.0" rx="1.5"/><rect class="b-base" x="117.7" y="29.6" width="6.6" height="62.4" rx="1.5"/><rect class="b-build b-now" x="127.4" y="28.6" width="6.6" height="63.4" rx="1.5"/><rect class="b-build" x="137.0" y="26.4" width="6.6" height="65.6" rx="1.5"/><rect class="b-build" x="146.7" y="44.7" width="6.6" height="47.3" rx="1.5"/><rect class="b-build" x="156.4" y="24.3" width="6.6" height="67.7" rx="1.5"/><rect class="b-build" x="166.1" y="22.1" width="6.6" height="69.9" rx="1.5"/><rect class="b-build" x="175.7" y="21.0" width="6.6" height="71.0" rx="1.5"/><rect class="b-build" x="185.4" y="40.4" width="6.6" height="51.6" rx="1.5"/><rect class="b-build" x="195.1" y="17.8" width="6.6" height="74.2" rx="1.5"/><rect class="b-build" x="204.8" y="16.8" width="6.6" height="75.2" rx="1.5"/><rect class="b-build" x="214.5" y="14.6" width="6.6" height="77.4" rx="1.5"/><rect class="b-peak" x="224.1" y="37.2" width="6.6" height="54.8" rx="1.5"/><rect class="b-peak" x="233.8" y="12.5" width="6.6" height="79.5" rx="1.5"/><rect class="b-peak" x="243.5" y="10.3" width="6.6" height="81.7" rx="1.5"/><rect class="b-peak" x="253.2" y="8.2" width="6.6" height="83.8" rx="1.5"/><rect class="b-peak" x="262.8" y="32.9" width="6.6" height="59.1" rx="1.5"/><rect class="b-peak" x="272.5" y="6.0" width="6.6" height="86.0" rx="1.5"/><rect class="b-taper" x="282.2" y="36.1" width="6.6" height="55.9" rx="1.5"/><rect class="b-taper" x="291.9" y="79.1" width="6.6" height="12.9" rx="1.5"/></svg></div>
@@ -699,6 +711,12 @@ footer a:hover{color:var(--bone)}
       <p class="swipe label">Swipe →</p>
     </div>
   </div>
+</section>
+
+<!-- ================= INTERLUDE (black & white, deliberate break from the colour grade) ================= -->
+<section class="mono" aria-label="Interlude">
+  <picture><source media="(max-width: 699px)" srcset="/media/ridge-bw-m.webp"><img src="/media/ridge-bw.webp" alt="" loading="lazy" decoding="async" width="1920" height="1080"></picture>
+  <div class="wrap"><p class="mono-q rv">The mountain sets the terms.<br><span>You show up ready.</span></p></div>
 </section>
 
 <!-- ================= CREDIBILITY ================= -->
@@ -737,7 +755,8 @@ footer a:hover{color:var(--bone)}
         </div>
       </div>
       <div class="honest">
-        <div class="grid">
+        <figure class="honest-ph rv"><img src="/media/watch.webp" alt="A route on a wet GPS watch face, mid-run in the rain." width="1000" height="1250" loading="lazy" decoding="async"></figure>
+        <div class="honest-list">
           <div class="item rv"><b>From your data</b><p>Every number the coach quotes is pulled from your own runs. If it doesn't know, it says so.</p></div>
           <div class="item rv d1"><b>Tested</b><p>21 questions with known answers run against the coach before every release.</p></div>
           <div class="item rv d2"><b>No forced sync</b><p>Strava if you use it. Typing it in by hand if you don't.</p></div>
@@ -776,7 +795,7 @@ footer a:hover{color:var(--bone)}
 
 <footer class="dark">
   <div class="wrap">
-    <a class="logo" href="#top" aria-label="Trail.AI">Trail<i aria-hidden="true"></i>AI</a>
+    <a class="logo" href="#top" aria-label="Isard"><svg viewBox="34 56 420 116" aria-hidden="true" focusable="false"><g fill="currentColor"><path d="M40.00,166.00 C43.48,140.00 46.92,112.00 51.52,92.00 C55.20,76.00 65.04,68.00 76.08,70.00 C86.12,72.00 91.32,82.00 90.72,102.00 C86.50,91.00 81.40,86.00 75.42,87.00 C69.44,88.00 67.60,96.00 66.80,106.00 C65.20,126.00 63.60,146.00 62.00,166.00 Z M76.00,160.00 C81.04,134.00 86.16,106.00 91.96,86.00 C96.60,70.00 106.92,62.00 117.84,64.00 C127.76,66.00 132.36,76.00 130.56,96.00 C127.00,85.00 122.20,80.00 116.16,81.00 C110.12,82.00 107.80,90.00 106.40,100.00 C103.60,120.00 100.80,140.00 98.00,160.00 Z"/><path d="M173.632 158.464V71.93599999999999Q173.632 71.29599999999999 174.07999999999998 70.84799999999998Q174.528 70.39999999999999 175.168 70.39999999999999H190.144Q190.784 70.39999999999999 191.232 70.84799999999998Q191.68 71.29599999999999 191.68 71.93599999999999V158.464Q191.68 159.104 191.232 159.55200000000002Q190.784 160.0 190.144 160.0H175.168Q174.528 160.0 174.07999999999998 159.55200000000002Q173.632 159.104 173.632 158.464Z M203.84 137.6V133.888Q203.84 133.248 204.288 132.8Q204.736 132.352 205.376 132.352H220.096Q220.736 132.352 221.184 132.8Q221.632 133.248 221.632 133.888V136.704Q221.632 140.672 223.68 143.10399999999998Q225.728 145.536 228.8 145.536Q231.872 145.536 233.92000000000002 143.232Q235.96800000000002 140.928 235.96800000000002 137.216Q235.96800000000002 133.376 233.40800000000002 130.624Q230.848 127.872 223.424 122.49600000000001Q217.024 117.888 213.05599999999998 114.304Q209.088 110.72 206.272 105.472Q203.456 100.22399999999999 203.456 93.312Q203.456 82.432 210.24 75.904Q217.024 69.376 228.16 69.376Q239.424 69.376 246.272 76.16Q253.12 82.944 253.12 93.952V97.024Q253.12 97.664 252.672 98.112Q252.224 98.56 251.584 98.56H236.864Q236.224 98.56 235.776 98.112Q235.328 97.664 235.328 97.024V93.568Q235.328 89.6 233.344 87.232Q231.36 84.864 228.16 84.864Q225.088 84.864 223.168 87.104Q221.248 89.344 221.248 93.312Q221.248 97.152 223.68 100.096Q226.112 103.03999999999999 233.28 108.288Q241.216 114.176 245.248 117.82400000000001Q249.28 121.47200000000001 251.51999999999998 125.888Q253.76 130.304 253.76 136.448Q253.76 147.712 246.848 154.368Q239.936 161.024 228.672 161.024Q221.248 161.024 215.61599999999999 158.07999999999998Q209.984 155.136 206.912 149.824Q203.84 144.512 203.84 137.6Z M300.992 158.592 298.944 146.304Q298.944 145.664 298.176 145.664H281.92Q281.152 145.664 281.152 146.304L279.104 158.592Q278.976 160.0 277.44 160.0H262.464Q260.8 160.0 261.18399999999997 158.336L280.0 71.80799999999999Q280.256 70.39999999999999 281.664 70.39999999999999H298.944Q300.352 70.39999999999999 300.608 71.80799999999999L319.296 158.336L319.424 158.848Q319.424 160.0 318.016 160.0H302.656Q301.12 160.0 300.992 158.592ZM284.224 131.712H295.744Q296.384 131.712 296.256 131.072L290.24 96.128Q290.11199999999997 95.744 289.856 95.744Q289.6 95.744 289.472 96.128L283.712 131.072Q283.712 131.712 284.224 131.712Z M362.81600000000003 158.72 352.96000000000004 123.392Q352.704 122.88 352.32000000000005 122.88H347.968Q347.32800000000003 122.88 347.32800000000003 123.52V158.464Q347.32800000000003 159.104 346.88 159.55200000000002Q346.432 160.0 345.79200000000003 160.0H330.81600000000003Q330.17600000000004 160.0 329.72800000000007 159.55200000000002Q329.28000000000003 159.104 329.28000000000003 158.464V71.93599999999999Q329.28000000000003 71.29599999999999 329.72800000000007 70.84799999999998Q330.17600000000004 70.39999999999999 330.81600000000003 70.39999999999999H356.672Q363.71200000000005 70.39999999999999 369.216 73.792Q374.72 77.184 377.72800000000007 83.328Q380.73600000000005 89.472 380.73600000000005 97.408Q380.73600000000005 104.96000000000001 377.856 110.72Q374.976 116.47999999999999 369.856 119.68Q369.6 119.80799999999999 369.47200000000004 120.0Q369.34400000000005 120.19200000000001 369.47200000000004 120.44800000000001L381.24800000000005 158.208L381.37600000000003 158.72Q381.37600000000003 160.0 379.968 160.0H364.608Q363.20000000000005 160.0 362.81600000000003 158.72ZM347.32800000000003 86.52799999999999V108.416Q347.32800000000003 109.056 347.968 109.056H353.728Q357.696 109.056 360.192 105.91999999999999Q362.68800000000005 102.78399999999999 362.68800000000005 97.536Q362.68800000000005 92.16 360.192 89.024Q357.696 85.888 353.728 85.888H347.968Q347.32800000000003 85.888 347.32800000000003 86.52799999999999Z M392.12800000000004 158.464V71.93599999999999Q392.12800000000004 71.29599999999999 392.576 70.84799999999998Q393.02400000000006 70.39999999999999 393.66400000000004 70.39999999999999H416.83200000000005Q428.48 70.39999999999999 435.52000000000004 77.184Q442.56000000000006 83.968 442.56000000000006 95.232V135.168Q442.56000000000006 146.432 435.52000000000004 153.216Q428.48 160.0 416.83200000000005 160.0H393.66400000000004Q393.02400000000006 160.0 392.576 159.55200000000002Q392.12800000000004 159.104 392.12800000000004 158.464ZM410.81600000000003 144.512 416.576 144.38400000000001Q420.03200000000004 144.256 422.208 141.44Q424.384 138.624 424.51200000000006 134.016V96.384Q424.51200000000006 91.52 422.336 88.70400000000001Q420.16 85.888 416.44800000000004 85.888H410.81600000000003Q410.17600000000004 85.888 410.17600000000004 86.52799999999999V143.872Q410.17600000000004 144.512 410.81600000000003 144.512Z"/></g></svg></a>
     <span>Made in London, for the long way up.</span>
     <nav aria-label="Footer">
       <a class="label" href="/app?mode=demo">Live demo</a>

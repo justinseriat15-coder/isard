@@ -55,6 +55,27 @@ function toast(msg) {
   setTimeout(() => t.remove(), 3200);
 }
 
+
+const OK_SVG = () => { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('viewBox', '0 0 20 20'); s.setAttribute('aria-hidden', 'true');
+  s.innerHTML = '<circle class="ok-dot" cx="10" cy="10" r="10"/><path class="ok-tick" d="M6 10.4 8.8 13 14 7.4"/>'; return s; };
+const TICK_SVG = () => { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('viewBox', '0 0 12 12'); s.setAttribute('aria-hidden', 'true');
+  s.innerHTML = '<path d="M2.8 6.3 5 8.5 9.3 3.8"/>'; return s; };
+const clock = (m) => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
+// A plausible elevation profile, stable per date (illustrative, not a real route).
+function routeSvg(seed, hilly) {
+  let x = 0; for (const c of seed) x = (x * 31 + c.charCodeAt(0)) >>> 0;
+  const rnd = () => { x = (x * 1664525 + 1013904223) >>> 0; return x / 2 ** 32; };
+  const a = 0.6 + rnd() * 0.8; const b = rnd() * 6; const amp = hilly ? 1 : 0.45;
+  const pts = []; for (let i = 0; i <= 60; i++) {
+    const y = 30 - amp * (13 * Math.sin(i / (8 * a) + b) + 7 * Math.sin(i / 3.1 + b * 2)) - 2 * Math.sin(i / 1.3) + (rnd() - 0.5) * 1.6;
+    pts.push(`${(i * 5).toFixed(1)} ${Math.max(4, Math.min(52, y)).toFixed(1)}`); }
+  const d = `M${pts.join(' L')}`;
+  const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  s.setAttribute('class', 'route'); s.setAttribute('viewBox', '0 0 300 56'); s.setAttribute('preserveAspectRatio', 'none'); s.setAttribute('aria-hidden', 'true');
+  s.innerHTML = `<path class="rf" d="${d} L300 56 L0 56Z"/><path class="rl" d="${d}"/>`;
+  return s;
+}
+
 // ---------- data ----------
 async function api(method, body) {
   const r = await fetch('/api/plan', { method, headers: body ? { 'Content-Type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined });
@@ -163,24 +184,41 @@ function sessionActions(s, { onLight = false } = {}) {
   const st = statusOf(s);
   if (s.type === 'rest') return null;
   if (s.done) {
-    return h('div', { class: 'done-line' },
+    return h('div', { class: 'done-line' }, OK_SVG(),
       `Done · ${fmtMin(s.done.minutes)} · felt ${s.done.feel === 'ok' ? 'about right' : s.done.feel}`,
       h('button', { type: 'button', onclick: () => act({ action: 'undo', date: s.originalDate }) }, 'Undo'));
   }
   const canAct = s.date <= addDays(TODAY, 0) || true;
   return h('div', { class: 'actions' },
-    canAct && s.type !== 'race' ? h('button', { class: 'btn', type: 'button', onclick: () => doneSheet(s) }, st === 'missed' ? 'Log it anyway' : 'Mark as done') : null,
+    canAct && s.type !== 'race' ? h('button', { class: 'btn grow', type: 'button', onclick: () => doneSheet(s) }, st === 'missed' ? 'Log it anyway' : 'Mark as done') : null,
     s.type !== 'race' ? h('button', { class: `btn ghost${onLight ? '' : ''}`, type: 'button', onclick: () => moveSheet(s) }, 'Move') : null);
 }
 
 function sessionCard(s, week) {
+  const runLike = isRunType(s.type);
+  const tag = s.type === 'long' ? 'Long run' : s.type === 'race' ? 'Race day' : s.title;
+  const head = runLike && s.minutes
+    ? h('div', { class: 'big-time' }, h('b', { id: 'today-title' }, clock(s.minutes)), h('span', {}, s.minutes >= 60 ? 'hours' : 'minutes', h('br'), s.type === 'long' ? 'on trail' : EFFORT[s.effort]?.label.toLowerCase()))
+    : h('h2', { class: 'display', id: 'today-title' }, sessionHeadline(s));
+  const meta = [];
+  if (s.type === 'race') meta.push(h('span', {}, h('b', {}, String(state.config.race.km)), ' km'), h('span', {}, h('b', {}, state.config.race.dplus.toLocaleString('en-GB')), ' m D+'));
   return h('article', { class: 'card', 'aria-labelledby': 'today-title' },
-    h('div', { class: 'k label' }, h('span', {}, s.date === TODAY ? 'Today' : dayLabel(s.date)), h('b', {}, s.type === 'long' ? 'Key session' : s.type === 'race' ? 'Race' : PHASE[week.phase])),
-    h('h2', { class: 'display', id: 'today-title' }, sessionHeadline(s)),
-    s.detail ? h('p', { class: 'detail' }, s.detail) : null,
-    effortRow(s),
-    s.why ? h('p', { class: 'why' }, s.why) : null,
-    sessionActions(s, { onLight: true }));
+    h('div', { class: 'k' }, h('span', { class: `chip${runLike ? '' : ' calm'}` }, tag), h('span', { class: 'label' }, `Week ${week.number} · ${PHASE[week.phase]}`)),
+    head,
+    runLike && s.type !== 'race' ? routeSvg(s.originalDate, s.type === 'long' || s.type === 'hills') : null,
+    meta.length ? h('div', { class: 'meta' }, ...meta) : null,
+    s.detail && s.type !== 'race' ? h('p', { class: 'detail' }, s.detail) : null,
+    s.type !== 'rest' ? effortRow(s) : null,
+    s.why ? h('p', { class: 'why' }, s.why) : null);
+}
+
+function weekStrip(week) {
+  return h('div', { class: 'wstrip', role: 'list', 'aria-label': 'This week' }, ...week.sessions.map((s) => {
+    const st = statusOf(s);
+    const cls = ['wd', isRunType(s.type) ? 'run' : '', s.type === 'rest' ? 'rest' : '', st === 'done' ? 'done' : '', st === 'missed' ? 'missed' : '', s.date === TODAY ? 'today' : ''].join(' ');
+    return h('span', { class: cls, role: 'listitem', 'aria-label': `${DAY_LONG[weekday(s.date)]}: ${s.title}${st === 'done' ? ', done' : st === 'missed' ? ', missed' : ''}` },
+      h('em', {}, DAY_NAMES[weekday(s.date)][0]), h('i', {}, st === 'done' ? TICK_SVG() : null));
+  }));
 }
 
 // ---------- views ----------
@@ -207,14 +245,17 @@ function viewToday() {
   const done = week.sessions.reduce((a, s) => a + (s.done?.minutes && isRunType(s.type) ? s.done.minutes : 0), 0);
   const nextKey = state.plan.weeks.flatMap((w) => w.sessions).find((s) => s.date > TODAY && (s.type === 'long' || s.type === 'race'));
 
+  const pct = Math.min(100, Math.round((done / Math.max(planned, 1)) * 100));
   el.append(h('div', { class: 'grid2' },
-    sessionCard(session, week),
+    h('div', { class: 'today-col' }, sessionCard(session, week), sessionActions(session)),
     h('div', { class: 'stack' },
-      tomorrow ? h('div', { class: 'block' }, h('h3', {}, 'Tomorrow'), h('p', { class: 'big num' }, sessionHeadline(tomorrow.session)), tomorrow.session.type === 'rest' ? h('p', {}, 'Recovery is part of the plan.') : h('p', {}, EFFORT[tomorrow.session.effort]?.words || '')) : null,
-      h('div', { class: 'block' }, h('h3', {}, 'This week, running'), h('p', { class: 'big num' }, `${fmtHours(done)} `, h('span', { class: 'muted' }, `/ ${fmtHours(planned)}`)),
-        h('div', { class: 'meter', role: 'img', 'aria-label': `${Math.round((done / Math.max(planned, 1)) * 100)}% of the week's running done` }, h('i', { style: `width:${Math.min(100, Math.round((done / Math.max(planned, 1)) * 100))}%` }))),
-      nextKey ? h('div', { class: 'block' }, h('h3', {}, 'Next key session'), h('p', { class: 'big num' }, sessionHeadline(nextKey)), h('p', {}, dayLabel(nextKey.date))) : null,
-      h('a', { class: 'btn ghost', href: '#plan' }, 'See the week'))));
+      h('a', { class: 'panel', href: '#plan' },
+        h('h3', {}, h('span', {}, 'This week'), h('span', {}, `${fmtHours(done)} / ${fmtHours(planned)}`)),
+        weekStrip(week),
+        h('div', { class: 'meter', role: 'img', 'aria-label': `${pct}% of the week's running done` }, h('i', { style: `width:${pct}%` }))),
+      h('div', { class: 'pair' },
+        tomorrow ? h('div', { class: 'panel' }, h('h3', {}, 'Tomorrow'), h('p', { class: 'big num' }, tomorrow.session.type === 'rest' ? 'Rest' : sessionHeadline(tomorrow.session)), h('p', {}, tomorrow.session.type === 'rest' ? 'Recovery counts.' : EFFORT[tomorrow.session.effort]?.words || '')) : null,
+        nextKey ? h('div', { class: 'panel' }, h('h3', {}, 'Next key'), h('p', { class: 'big num' }, `${DAY_NAMES[weekday(nextKey.date)]} · ${nextKey.type === 'race' ? 'Race' : clock(nextKey.minutes)}`), h('p', {}, dayLabel(nextKey.date))) : null))));
 }
 
 function seasonStrip(currentIdx) {
@@ -223,8 +264,8 @@ function seasonStrip(currentIdx) {
   ph.forEach((p, i) => { if (!groups.length || groups.at(-1).p !== p) groups.push({ p, n: 0, i }); groups.at(-1).n++; });
   const total = ph.length;
   const strip = h('div', { class: 'season', role: 'img', 'aria-label': `Season: ${groups.map((g) => `${PHASE[g.p]} ${g.n} weeks`).join(', ')}. Showing week ${currentIdx + 1}.` },
-    ...groups.map((g) => h('span', { class: g.p, style: `width:${(g.n / total) * 100}%` }, PHASE[g.p])),
-    h('i', { class: 'here', style: `left:calc(${((currentIdx + 0.5) / total) * 100}% - 1px)` }));
+    ...groups.map((g) => h('span', { class: g.p, style: `flex:${g.n} 1 0;min-width:0` }, PHASE[g.p])),
+    h('i', { class: 'here', style: `left:calc(4px + (100% - 8px) * ${((currentIdx + 0.5) / total).toFixed(4)} - 1.5px)` }));
   return strip;
 }
 
@@ -245,14 +286,14 @@ function viewPlan() {
   const list = h('ul', { class: 'week' });
   for (const s of week.sessions) {
     const st = statusOf(s);
-    const cls = ['day', isRunType(s.type) ? 'run' : '', s.type === 'rest' ? 'rest' : '', `is-${st}`, s.date === TODAY ? 'is-today' : '', state.expanded === s.date ? 'expanded' : ''].join(' ');
-    const stLabel = st === 'done' ? 'Done' : st === 'missed' ? 'Missed' : s.date === TODAY ? 'Today' : s.type === 'rest' ? '' : fmtMin(s.minutes || 0);
+    const cls = ['day', isRunType(s.type) ? 'run' : '', s.type === 'strength' ? 'str' : '', s.type === 'rest' ? 'rest' : '', `is-${st}`, s.date === TODAY ? 'is-today' : '', state.expanded === s.date ? 'expanded' : ''].join(' ');
+    const stLabel = st === 'done' ? '' : st === 'missed' ? 'Missed' : s.date === TODAY ? 'Today' : s.type === 'rest' ? '' : fmtMin(s.minutes || 0);
     const id = `d-${s.date}`;
     list.append(h('li', { class: cls },
       h('button', { type: 'button', 'aria-expanded': state.expanded === s.date ? 'true' : 'false', 'aria-controls': id, onclick: () => { state.expanded = state.expanded === s.date ? null : s.date; render(); } },
         h('span', { class: 'dn' }, DAY_NAMES[weekday(s.date)], h('em', {}, String(Number(s.date.slice(8))))),
         h('span', { class: 's' }, s.title, s.moved ? h('span', { class: 'moved-tag' }, 'Moved') : null, h('small', {}, s.type === 'rest' ? (s.why || 'Rest') : `${s.detail || EFFORT[s.effort]?.words || ''}`)),
-        h('span', { class: 'st' }, stLabel)),
+        h('span', { class: 'st' }, st === 'done' ? OK_SVG() : stLabel)),
       h('div', { class: 'open', id },
         s.type !== 'rest' ? effortRow(s) : null,
         s.why ? h('p', { class: 'why' }, s.why) : null,
@@ -298,20 +339,20 @@ function viewProgress() {
     const x = i * bw + bw * 0.18; const wd = bw * 0.64;
     const ph = (plan / maxM) * (H - 24); const dh = (Math.min(done, maxM) / maxM) * (H - 24);
     const r1 = document.createElementNS(ns, 'rect');
-    Object.entries({ x, y: H - 18 - ph, width: wd, height: ph, fill: 'none', stroke: w.index > cur ? 'rgba(236,230,218,.25)' : 'rgba(236,230,218,.5)', 'stroke-width': 1, 'vector-effect': 'non-scaling-stroke' }).forEach(([k, v]) => r1.setAttribute(k, v));
+    Object.entries({ x, y: H - 18 - ph, width: wd, height: ph, fill: 'none', stroke: w.index > cur ? 'rgba(17,17,16,.18)' : 'rgba(17,17,16,.35)', 'stroke-width': 1, 'vector-effect': 'non-scaling-stroke' }).forEach(([k, v]) => r1.setAttribute(k, v));
     svg.append(r1);
     if (done) {
       const r2 = document.createElementNS(ns, 'rect');
-      Object.entries({ x, y: H - 18 - dh, width: wd, height: dh, fill: w.index === cur ? '#F0602F' : '#8F8A7E' }).forEach(([k, v]) => r2.setAttribute(k, v));
+      Object.entries({ x, y: H - 18 - dh, width: wd, height: dh, fill: w.index === cur ? '#F0602F' : '#3C7A4D' }).forEach(([k, v]) => r2.setAttribute(k, v));
       svg.append(r2);
     }
     const tx = document.createElementNS(ns, 'text');
-    Object.entries({ x: x + wd / 2, y: H - 4, 'text-anchor': 'middle', fill: '#8F8A7E', 'font-size': 10, 'font-family': 'Archivo, sans-serif' }).forEach(([k, v]) => tx.setAttribute(k, v));
+    Object.entries({ x: x + wd / 2, y: H - 4, 'text-anchor': 'middle', fill: '#6E6A62', 'font-size': 10, 'font-family': '-apple-system, Inter, sans-serif' }).forEach(([k, v]) => tx.setAttribute(k, v));
     tx.textContent = String(w.number);
     svg.append(tx);
   });
-  el.append(h('div', { class: 'chart' }, h('p', { class: 'label muted' }, 'Running hours per week'), svg,
-    h('div', { class: 'legend label' }, h('span', {}, h('i', { style: 'box-shadow:inset 0 0 0 1px #ECE6DA' }), 'Planned'), h('span', {}, h('i', { style: 'background:#8F8A7E' }), 'Done'), h('span', {}, h('i', { style: 'background:#F0602F' }), 'This week'))));
+  el.append(h('div', { class: 'chart' }, h('p', { class: 'label' }, 'Running hours per week'), svg,
+    h('div', { class: 'legend label' }, h('span', {}, h('i', { style: 'box-shadow:inset 0 0 0 1px rgba(17,17,16,.35)' }), 'Planned'), h('span', {}, h('i', { style: 'background:#3C7A4D' }), 'Done'), h('span', {}, h('i', { style: 'background:#F0602F' }), 'This week'))));
 
   el.append(h('a', { class: 'linkout', href: `/analysis?mode=${state.mode}` },
     h('div', {}, h('b', {}, 'Detailed analysis'), h('span', {}, state.mode === 'demo' ? 'Load, easy share, climbing speed and aerobic engine, from the demo runner’s watch data.' : 'Load, easy share, climbing speed and aerobic engine, from your Strava data.')),
@@ -354,8 +395,8 @@ function viewSetup() {
       location.hash = '#today'; toast('Plan ready.');
     } catch (x) { err.textContent = x.message; }
   } },
-  h('fieldset', { class: 'form', style: 'border:0;padding:0;margin:0' },
-    h('legend', { class: 'label muted', style: 'margin-bottom:12px' }, 'The race'),
+  h('fieldset', { class: 'form' },
+    h('legend', {}, 'The race'),
     h('label', { class: 'field' }, h('span', {}, 'Name'), input('name', { value: c.race.name, placeholder: 'Ultra Marin', maxlength: '80' })),
     h('div', { class: 'row2' },
       h('label', { class: 'field' }, h('span', {}, 'Date'), input('date', { type: 'date', value: c.race.date, required: true })),
@@ -363,8 +404,8 @@ function viewSetup() {
     h('div', { class: 'row2' },
       h('label', { class: 'field' }, h('span', {}, 'Distance, km'), input('km', { type: 'number', inputmode: 'decimal', min: '5', max: '400', value: String(c.race.km), required: true })),
       h('label', { class: 'field' }, h('span', {}, 'Climbing, m'), input('dplus', { type: 'number', inputmode: 'numeric', min: '0', max: '30000', value: String(c.race.dplus) })))),
-  h('fieldset', { class: 'form', style: 'border:0;padding:0;margin:0' },
-    h('legend', { class: 'label muted', style: 'margin-bottom:12px' }, 'Your week'),
+  h('fieldset', { class: 'form' },
+    h('legend', {}, 'Your week'),
     h('div', { class: 'field' }, h('span', {}, 'Days you can run'), dayBoxes('run', c.runDays)),
     h('label', { class: 'field' }, h('span', {}, 'Long run on'), h('select', { name: 'long' }, ...DAY_LONG.map((d, i) => h('option', { value: String(i), selected: i === c.longRunDay }, d)))),
     h('div', { class: 'field' }, h('span', {}, 'Leg strength on'), dayBoxes('strength', c.strengthDays)),
@@ -386,7 +427,7 @@ const VIEWS = ['today', 'plan', 'progress', 'coach', 'setup', 'message'];
 function show(name) {
   for (const v of VIEWS) $(`view-${v}`).hidden = v !== name;
   document.querySelectorAll('[data-tab]').forEach((a) => { if (a.dataset.tab === name) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
-  document.title = `Trail.AI — ${name[0].toUpperCase()}${name.slice(1)}`;
+  document.title = `Isard — ${name[0].toUpperCase()}${name.slice(1)}`;
 }
 
 function render() {
@@ -406,7 +447,8 @@ async function boot() {
   const me = await fetch('/api/me').then((r) => r.json()).catch(() => ({ connected: false }));
   state.mode = params.get('mode') === 'live' && me.connected ? 'live' : params.get('mode') === 'demo' ? 'demo' : me.connected ? 'live' : 'demo';
   history.replaceState({}, '', `/app?mode=${state.mode}${location.hash}`);
-  $('mode').textContent = state.mode === 'demo' ? 'Demo' : `Strava · ${me.athlete?.firstname || ''}`;
+  $('mode').textContent = state.mode === 'demo' ? 'Demo' : 'Strava connected';
+  $('avatar').textContent = state.mode === 'demo' ? 'D' : (me.athlete?.firstname || 'J')[0];
   $('demo-note').hidden = state.mode !== 'demo';
 
   if (state.mode === 'demo') {

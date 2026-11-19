@@ -1,6 +1,19 @@
 # Trail.AI
 
-Endurance training analytics on Strava data, with an LLM coach that only reasons over metrics computed server-side.
+Trail and ultra training plans that explain themselves, with endurance analytics on Strava data and an LLM coach that only reasons over metrics computed server-side.
+
+**Pages:** `/` landing · `/app` the plan (Today, Plan, Progress, Coach) · `/analysis` detailed analysis and coach chat.
+
+## The plan engine
+
+`public/js/plan.js` builds the season from a short brief (race date, distance, climbing, the days you can run, long-run day, current weekly hours). Rules in code, no model call: it is free, deterministic and testable, and the coach explains the plan rather than writing it.
+
+- Base / build / peak / taper in 45 / 35 / 20 proportions, 1–2 taper weeks, a lighter week every fourth week.
+- Long run and midweek runs each grow by at most 10% a week; peak volume is capped at twice the starting volume.
+- The athlete's rule *never two run days in a row* is enforced when the plan is built and every time a session is moved (`canMove`), in the browser and again on the server.
+- Every session carries its effort in words ("you can hold a conversation") and one or two sentences on why it is there.
+
+Plans and logged sessions are stored in Postgres (Neon, `DATABASE_URL`) via `/api/plan`. The demo builds its plan in the browser and saves nothing.
 
 **Live demo:** https://trail-dashboard-one.vercel.app/?mode=demo (fictional athlete, 16 weeks of synthetic data) · **[How it's built](https://trail-dashboard-one.vercel.app/how-its-built.html)**
 
@@ -50,6 +63,8 @@ api/               serverless endpoints
   streams          → per-second streams of one activity
   chat             → coach agent (tool loop) with SSE step + text streaming
 lib/               session crypto, Strava client, prompt builder, agent loop, rate limiter
+  plan.js          training plan engine (pure), shared by browser and server
+  js/today.js      the app: Today, Plan, Progress, Coach
 tests/             node:test unit tests (metrics, session crypto, agent loop) + live eval harness (`npm run eval`)
 ```
 

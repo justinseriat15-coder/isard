@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Trail.AI — Today</title>
+<meta name="description" content="Your training plan: today's session, the week, and why each session is there.">
+<meta name="theme-color" content="#0E0F0D">
+<link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/newsreader-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/app.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230E0F0D'/%3E%3Crect x='11' y='11' width='10' height='10' transform='rotate(45 16 16)' fill='%23F0602F'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="bar">
+  <div class="bar-in">
+    <a class="logo" href="/" aria-label="Trail.AI home"><i aria-hidden="true"></i>Trail.AI</a>
+    <nav class="tabs-top" aria-label="App">
+      <a href="#today" data-tab="today">Today</a>
+      <a href="#plan" data-tab="plan">Plan</a>
+      <a href="#progress" data-tab="progress">Progress</a>
+      <a href="#coach" data-tab="coach">Coach</a>
+    </nav>
+    <span class="mode" id="mode"></span>
+  </div>
+</header>
+
+<p class="demo-note" id="demo-note" hidden>Demo: a fictional runner. Everything works, nothing is saved. <a href="/">About Trail.AI</a></p>
+
+<main id="main" class="main">
+  <div class="loading" id="loading" aria-live="polite">Loading your plan…</div>
+  <section id="view-today" class="view" hidden aria-labelledby="h-today"></section>
+  <section id="view-plan" class="view" hidden aria-labelledby="h-plan"></section>
+  <section id="view-progress" class="view" hidden aria-labelledby="h-progress"></section>
+  <section id="view-coach" class="view" hidden aria-labelledby="h-coach"></section>
+  <section id="view-setup" class="view" hidden aria-labelledby="h-setup"></section>
+  <section id="view-message" class="view" hidden></section>
+</main>
+
+<nav class="tabs-bottom" aria-label="App">
+  <a href="#today" data-tab="today"><span class="ic ic-today" aria-hidden="true"></span>Today</a>
+  <a href="#plan" data-tab="plan"><span class="ic ic-plan" aria-hidden="true"></span>Plan</a>
+  <a href="#progress" data-tab="progress"><span class="ic ic-progress" aria-hidden="true"></span>Progress</a>
+  <a href="#coach" data-tab="coach"><span class="ic ic-coach" aria-hidden="true"></span>Coach</a>
+</nav>
+
+<div class="sheet-back" id="sheet-back" hidden></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden></div>
+
+<script type="module" src="/js/today.js"></script>
+</body>
+</html>

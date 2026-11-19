@@ -119,11 +119,10 @@ async function boot() {
   if (mode === 'live' && !me.connected) mode = null;
 
   if (!mode) {
-    $('landing').hidden = false;
-    if (auth) showLandingNotice(auth);
+    location.replace(auth ? `/?auth=${encodeURIComponent(auth)}` : '/');
     return;
   }
-  history.replaceState({}, '', `/?mode=${mode}`);
+  history.replaceState({}, '', `/analysis?mode=${mode}${location.hash}`);
   state.mode = mode;
   $('app').hidden = false;
   $('demo-banner').hidden = mode !== 'demo';
@@ -132,23 +131,13 @@ async function boot() {
   $('mode-pill').classList.toggle('live', mode === 'live');
   $('logout-btn').hidden = mode !== 'live';
   initChat();
+  // Arriving from the app's Coach tab with a question: prefill it, don't send it.
+  const ask = (params.get('ask') || '').slice(0, 300);
+  if (ask) { $('chat-text').value = ask; $('coach').scrollIntoView({ block: 'start' }); $('chat-text').focus({ preventScroll: true }); }
+  else if (location.hash === '#coach') $('coach').scrollIntoView({ block: 'start' });
   await loadData();
 }
 
-function showLandingNotice(code) {
-  const msg = {
-    denied: 'Strava login cancelled.',
-    invalid_state: 'Login session expired, please try again.',
-    missing_scope: "Allow access to your activities so the analysis can work.",
-    exchange_failed: "Strava refused the connection. The app is limited to the owner's account in developer mode, try the demo.",
-  }[code];
-  if (!msg) return;
-  const p = document.createElement('p');
-  p.className = 'error-box';
-  p.style.marginTop = '16px';
-  p.textContent = msg;
-  document.querySelector('.hero').appendChild(p);
-}
 
 async function loadData() {
   try {

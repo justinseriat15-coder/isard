@@ -157,3 +157,34 @@ test('matchActivities completes planned runs from Strava, manual logs win, extra
   assert.equal(s(mon).done, null);
   assert.deepEqual(p.extras.map((e) => e.date), [sun]);
 });
+
+test('session card helpers: key sessions, difficulty, distance estimate', async () => {
+  const { isKeySession, sessionDifficulty, estimateKm } = await import('../public/js/plan.js');
+  assert.equal(isKeySession({ type: 'long' }), true);
+  assert.equal(isKeySession({ type: 'easy' }), false);
+  assert.equal(sessionDifficulty({ type: 'rest' }), 0);
+  assert.equal(sessionDifficulty({ type: 'hills', minutes: 50 }), 4);
+  assert.equal(sessionDifficulty({ type: 'long', minutes: 300 }), 4);
+  assert.equal(sessionDifficulty({ type: 'easy', minutes: 45 }), 1);
+  assert.equal(estimateKm({ type: 'easy', minutes: 60 }, 360), 10);
+  assert.equal(estimateKm({ type: 'strength', minutes: 40 }), null);
+  assert.ok(estimateKm({ type: 'long', minutes: 120 }, 360) < 20);
+});
+
+test('regularity counts done vs due and adds extras', async () => {
+  const { regularity, matchActivities } = await import('../public/js/plan.js');
+  const raw = generatePlan(validateConfig(base).config);
+  const week = raw.weeks[1];
+  const today = addDays(raw.weeks[2].start, 0);
+  const tue = addDays(week.start, 1); const sun = addDays(week.start, 6);
+  const p = matchActivities(applyLog(raw, {}), [
+    { type: 'Run', start_date_local: `${tue}T07:00:00Z`, moving_time: 2400 },
+    { type: 'Run', start_date_local: `${sun}T07:00:00Z`, moving_time: 2400 },
+  ]);
+  const r = regularity(p, today);
+  assert.equal(r.columns.length, 3);
+  assert.ok(r.columns[1].cells.includes('extra'));
+  assert.equal(r.done, 1);
+  assert.ok(r.due >= 8);
+  assert.equal(r.columns[2].cells.every((c) => c === 'planned'), true);
+});

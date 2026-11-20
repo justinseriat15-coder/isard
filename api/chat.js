@@ -10,6 +10,7 @@ import { buildSystemPrompt } from '../lib/coach.js';
 import { computeInsights } from '../lib/insights.js';
 import { runCoachAgent } from '../lib/agent.js';
 import { rateLimit } from '../lib/ratelimit.js';
+import { loadPlan } from '../lib/plan-context.js';
 
 const MAX_TURNS = 12;
 const MAX_CHARS = 2000;
@@ -59,6 +60,7 @@ export default handler(['POST'], async (req, res) => {
   if (body.activityId) streams = await loadStreams(ctx, body.activityId).catch(() => null);
   // Insights (zone time, climbs) feed the coach's summary; cached, shared with the dashboard.
   ctx.insights = await computeInsights(ctx).catch(() => null);
+  ctx.plan = await loadPlan(ctx).catch(() => null);
   const system = buildSystemPrompt(ctx, { activityId: body.activityId, streams, perActivity: ctx.insights?.perActivity });
 
   // Demo and live share the model and agent settings (owner decision 2026-11-11:

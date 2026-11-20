@@ -3,7 +3,7 @@
 // Live mode reads and writes the plan through /api/plan; the server re-checks every change.
 import {
   validateConfig, generatePlan, applyLog, canMove, sessionOn, weekOf, isRunType,
-  addDays, weekday, isoDate, matchActivities, mondayOf, daysBetween, demoConfig, demoLog, EFFORT, DAY_NAMES, DAY_LONG,
+  addDays, weekday, isoDate, matchActivities, demoLogFor, regularity, isKeySession, sessionDifficulty, estimateKm, mondayOf, daysBetween, demoConfig, demoLog, EFFORT, DAY_NAMES, DAY_LONG,
 } from './plan.js';
 import { loadWatch, watchMetrics } from './watch.js';
 import { mountCoach } from './coach.js';
@@ -203,12 +203,14 @@ function sessionCard(s, week) {
     ? h('div', { class: 'big-time' }, h('b', { id: 'today-title' }, clock(s.minutes)), h('span', {}, s.minutes >= 60 ? 'hours' : 'minutes', h('br'), s.type === 'long' ? 'on trail' : EFFORT[s.effort]?.label.toLowerCase()))
     : h('h2', { class: 'display', id: 'today-title' }, sessionHeadline(s));
   const meta = [];
+  const est = estimateKm(s, easyPace());
+  if (s.type !== 'race' && s.type !== 'rest') meta.push(est ? h('span', {}, h('b', {}, `~${est}`), ' km') : null, h('span', { class: 'diff' }, 'Difficulty ', bolts(sessionDifficulty(s))));
   if (s.type === 'race') meta.push(h('span', {}, h('b', {}, String(state.config.race.km)), ' km'), h('span', {}, h('b', {}, state.config.race.dplus.toLocaleString('en-GB')), ' m D+'));
   return h('article', { class: 'card', 'aria-labelledby': 'today-title' },
-    h('div', { class: 'k' }, h('span', { class: `chip${runLike ? '' : ' calm'}` }, tag), h('span', { class: 'label' }, `Week ${week.number} · ${PHASE[week.phase]}`)),
+    h('div', { class: 'k' }, h('span', { class: `chip${isKeySession(s) ? '' : ' calm'}` }, isKeySession(s) && s.type !== 'race' ? `Key · ${tag}` : tag), h('span', { class: 'label' }, `Week ${week.number} · ${PHASE[week.phase]}`)),
     head,
     runLike && s.type !== 'race' ? routeSvg(s.originalDate, s.type === 'long' || s.type === 'hills') : null,
-    meta.length ? h('div', { class: 'meta' }, ...meta) : null,
+    meta.filter(Boolean).length ? h('div', { class: 'meta' }, ...meta.filter(Boolean)) : null,
     s.detail && s.type !== 'race' ? h('p', { class: 'detail' }, s.detail) : null,
     s.type !== 'rest' ? effortRow(s) : null,
     s.why ? h('p', { class: 'why' }, s.why) : null);
@@ -221,6 +223,41 @@ function weekStrip(week) {
     return h('span', { class: cls, role: 'listitem', 'aria-label': `${DAY_LONG[weekday(s.date)]}: ${s.title}${st === 'done' ? ', done' : st === 'missed' ? ', missed' : ''}` },
       h('em', {}, DAY_NAMES[weekday(s.date)][0]), h('i', {}, st === 'done' ? TICK_SVG() : null));
   }));
+}
+
+
+// The athlete's usual easy pace (sec/km), from their recent runs; 6:40/km when unknown.
+function easyPace() {
+  const p = (state.activities || []).filter((a) => /Run/.test(a.sport_type || a.type) && a.average_speed > 0).slice(0, 30).map((a) => 1000 / a.average_speed).sort((a, b) => a - b);
+  return p.length >= 3 ? p[Math.floor(p.length * 0.6)] : 400;
+}
+function bolts(n) {
+  return h('span', { class: 'bolts', role: 'img', 'aria-label': `Difficulty ${n} of 5` }, ...[1, 2, 3, 4, 5].map((i) => h('i', { class: i <= n ? 'on' : '' })));
+}
+function weekTotals(w) {
+  const inWeek = (d) => d >= w.start && d <= addDays(w.start, 6);
+  const acts = (state.activities || []).filter((a) => /Run/.test(a.sport_type || a.type) && inWeek(String(a.start_date_local).slice(0, 10)));
+  const manual = w.sessions.filter((s) => s.done && s.done.source !== 'strava');
+  return {
+    n: acts.length + manual.filter((s) => !acts.some((a) => String(a.start_date_local).slice(0, 10) === s.date)).length,
+    km: acts.reduce((m, a) => m + (a.distance || 0), 0) / 1000,
+    min: acts.reduce((m, a) => m + (a.moving_time || 0), 0) / 60 + manual.filter((s) => !acts.some((a) => String(a.start_date_local).slice(0, 10) === s.date)).reduce((m, s) => m + s.done.minutes, 0),
+  };
+}
+function weekOverview(week) {
+  const prev = state.plan.weeks[week.index - 1];
+  const a = weekTotals(week); const b = prev ? weekTotals(prev) : null;
+  const delta = (x, y, f) => {
+    if (b == null) return null;
+    const d = x - y; if (Math.abs(d) < 0.05) return h('span', { class: 'delta' }, '=');
+    return h('span', { class: `delta ${d > 0 ? 'up' : 'down'}` }, `${d > 0 ? '▲' : '▼'} ${f(Math.abs(d))}`);
+  };
+  return h('section', { class: 'panel overview', 'aria-label': 'Your week' },
+    h('h3', {}, h('span', {}, week.index === (weekOf(state.plan, TODAY)?.index) ? 'Your week so far' : 'Your week'), h('span', {}, b ? 'vs previous week' : '')),
+    h('div', { class: 'ov' },
+      h('div', {}, h('span', {}, 'Activities'), h('b', { class: 'num' }, String(a.n)), delta(a.n, b?.n, (v) => String(v))),
+      h('div', {}, h('span', {}, 'Distance'), h('b', { class: 'num' }, a.km.toFixed(1), h('small', {}, ' km')), delta(a.km, b?.km, (v) => v.toFixed(1))),
+      h('div', {}, h('span', {}, 'Time'), h('b', { class: 'num' }, fmtMin(Math.round(a.min))), delta(a.min, b?.min, (v) => fmtMin(Math.round(v))))));
 }
 
 // ---------- views ----------
@@ -239,7 +276,7 @@ function viewToday() {
   el.append(h('div', { class: 'view-head' },
     h('div', {}, h('p', { class: 'label kick' }, `${DAY_LONG[weekday(TODAY)]} · Week ${week.number} of ${state.plan.totalWeeks} · ${PHASE[week.phase]}${week.recovery ? ' · lighter week' : ''}`),
       h('h1', { class: 'display', id: 'h-today' }, 'Today')),
-    t ? h('div', { class: 'togo' }, h('b', { class: 'num' }, String(t.n)), h('span', { class: 'label' }, `${t.unit} · ${state.config.race.name}`)) : null));
+    t ? h('a', { class: 'togo', href: '#progress', 'aria-label': 'Open your goal' }, h('b', { class: 'num' }, String(t.n)), h('span', { class: 'label' }, `${t.unit} · ${state.config.race.name}`)) : null));
 
   const tomorrow = sessionOn(state.plan, addDays(TODAY, 1));
   const runs = week.sessions.filter((s) => isRunType(s.type));
@@ -283,7 +320,7 @@ function viewPlan() {
       h('button', { type: 'button', 'aria-label': 'Previous week', disabled: state.weekIdx === 0, onclick: () => { state.weekIdx--; state.expanded = null; render(); } }, '←'),
       h('span', { class: 'label' }, `${PHASE[week.phase]}${week.recovery ? ' · lighter' : ''} · ${fmtHours(runMin)}`),
       h('button', { type: 'button', 'aria-label': 'Next week', disabled: state.weekIdx === state.plan.weeks.length - 1, onclick: () => { state.weekIdx++; state.expanded = null; render(); } }, '→'))));
-  el.append(seasonStrip(state.weekIdx));
+  el.append(seasonStrip(state.weekIdx), weekOverview(week));
 
   const list = h('ul', { class: 'week' });
   for (const s of week.sessions) {
@@ -294,7 +331,7 @@ function viewPlan() {
     list.append(h('li', { class: cls },
       h('button', { type: 'button', 'aria-expanded': state.expanded === s.date ? 'true' : 'false', 'aria-controls': id, onclick: () => { state.expanded = state.expanded === s.date ? null : s.date; render(); } },
         h('span', { class: 'dn' }, DAY_NAMES[weekday(s.date)], h('em', {}, String(Number(s.date.slice(8))))),
-        h('span', { class: 's' }, s.title, s.moved ? h('span', { class: 'moved-tag' }, 'Moved') : null, h('small', {}, (() => { const ex = (state.plan.extras || []).find((e) => e.date === s.date); if (ex) return `Extra run from Strava: ${ex.activities[0].name}, ${(ex.activities.reduce((m, a) => m + (a.distance || 0), 0) / 1000).toFixed(1)} km`; return s.type === 'rest' ? (s.why || 'Rest') : `${s.detail || EFFORT[s.effort]?.words || ''}`; })())),
+        h('span', { class: 's' }, isKeySession(s) && s.type !== 'race' ? h('span', { class: 'key' }, 'Key session') : null, s.title, s.moved ? h('span', { class: 'moved-tag' }, 'Moved') : null, s.type !== 'rest' ? h('span', { class: 'facts' }, s.minutes ? h('span', {}, fmtMin(s.minutes)) : null, estimateKm(s, easyPace()) ? h('span', {}, `~${estimateKm(s, easyPace())} km`) : null, bolts(sessionDifficulty(s))) : null, h('small', {}, (() => { const ex = (state.plan.extras || []).find((e) => e.date === s.date); if (ex) return `Extra run from Strava: ${ex.activities[0].name}, ${(ex.activities.reduce((m, a) => m + (a.distance || 0), 0) / 1000).toFixed(1)} km`; return s.type === 'rest' ? (s.why || 'Rest') : `${s.detail || EFFORT[s.effort]?.words || ''}`; })())),
         h('span', { class: 'st' }, st === 'done' ? OK_SVG() : stLabel)),
       h('div', { class: 'open', id },
         s.type !== 'rest' ? effortRow(s) : null,
@@ -307,54 +344,78 @@ function viewPlan() {
     h('button', { class: 'btn ghost small', type: 'button', onclick: () => { location.hash = '#setup'; } }, state.mode === 'demo' ? 'Try it with your own race' : 'Edit goal and days')));
 }
 
+const SVGNS = 'http://www.w3.org/2000/svg';
+function svgEl(tag, attrs) { const e = document.createElementNS(SVGNS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; }
+const fmtDate = (d) => new Date(`${d}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+
+function goalHero() {
+  const r = state.config.race;
+  const d = daysBetween(TODAY, r.date);
+  const chip = d > 0 ? `D-${d}` : d === 0 ? 'Race day' : 'Done';
+  return h('header', { class: 'goal-hero' },
+    h('div', { class: 'gh-top' },
+      h('span', { class: 'status' }, h('i'), d >= 0 ? 'In preparation' : 'Finished'),
+      h('a', { class: 'gh-set', href: '#setup', 'aria-label': 'Edit goal and days' }, '⚙')),
+    h('div', { class: 'gh-body' },
+      h('h1', { class: 'display', id: 'h-progress' }, r.name),
+      h('p', { class: 'gh-date' }, fmtDate(r.date), h('span', { class: 'gh-chip' }, chip)),
+      h('div', { class: 'gh-stats' },
+        h('div', {}, h('span', {}, 'Distance'), h('b', {}, String(r.km), h('small', {}, ' km'))),
+        h('div', {}, h('span', {}, 'Climbing'), h('b', {}, r.dplus.toLocaleString('en-GB'), h('small', {}, ' m'))),
+        h('div', {}, h('span', {}, 'Preparation'), h('b', {}, String(state.plan.totalWeeks), h('small', {}, ' weeks'))))));
+}
+
+function regularityCard() {
+  const r = regularity(state.plan, TODAY);
+  const cols = r.columns.slice(-16);
+  const rows = Math.max(...cols.map((c) => c.cells.length), 1);
+  const order = { done: 0, extra: 1, missed: 2, planned: 3 };
+  const grid = h('div', { class: 'reg-grid', style: `--cols:${cols.length};--rows:${rows}`, role: 'img',
+    'aria-label': `Regularity: ${r.done} sessions done out of ${r.due} due, across ${cols.length} weeks.` },
+    ...cols.map((c) => h('div', { class: 'reg-col' },
+      ...[...c.cells].sort((x, y) => order[x] - order[y]).map((s) => h('i', { class: `c-${s}` })),
+      h('em', {}, c.number % 2 === 0 || cols.length <= 8 ? `W${c.number}` : '·'))));
+  return h('section', { class: 'gcard', 'aria-labelledby': 'h-reg' },
+    h('h2', { id: 'h-reg' }, 'Regularity'),
+    h('p', { class: 'gdesc' }, 'Consistency is what pays. Every session done builds the next one.'),
+    h('div', { class: 'gbig' }, h('b', {}, r.pct == null ? '—' : `${r.pct}%`), h('span', { class: 'pill' }, `${r.done} sessions of ${r.due}`)),
+    grid,
+    h('div', { class: 'legend' }, h('span', {}, h('i', { class: 'c-done' }), 'Done'), h('span', {}, h('i', { class: 'c-missed' }), 'Missed'), h('span', {}, h('i', { class: 'c-extra' }), 'Extra'), h('span', {}, h('i', { class: 'c-planned' }), 'Planned')));
+}
+
+function volumeCard() {
+  const cur = weekOf(state.plan, TODAY)?.index ?? state.plan.weeks.length - 1;
+  const ws = state.plan.weeks.slice(Math.max(0, cur - 11), cur + 1);
+  const planned = ws.map((w) => w.sessions.filter((s) => isRunType(s.type)).reduce((a, s) => a + s.minutes, 0) / 60);
+  const done = ws.map((w) => w.sessions.reduce((a, s) => a + (s.done && isRunType(s.type) ? s.done.minutes : 0), 0) / 60
+    + (state.plan.extras || []).filter((e) => e.date >= w.start && e.date <= addDays(w.start, 6)).reduce((a, e) => a + e.activities.reduce((m, x) => m + x.moving_time, 0) / 3600, 0));
+  const full = done.slice(0, -1);
+  const avg = full.length ? full.slice(-4).reduce((a, x) => a + x, 0) / Math.min(4, full.length) : 0;
+  const W = 600; const H = 180; const P = 18;
+  const max = Math.max(...planned, ...done, 1) * 1.15;
+  const x = (i) => P + (i * (W - 2 * P)) / Math.max(1, ws.length - 1);
+  const y = (v) => H - 22 - (v / max) * (H - 40);
+  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, preserveAspectRatio: 'none', role: 'img', 'aria-label': `Running hours per week, done against the plan's range, last ${ws.length} weeks.` });
+  for (const g of [0.25, 0.5, 0.75]) svg.append(svgEl('line', { x1: P, x2: W - P, y1: y(max * g), y2: y(max * g), class: 'grid' }));
+  const band = planned.map((v, i) => `${x(i)},${y(v * 1.1)}`).join(' ') + ' ' + planned.map((v, i) => `${x(i)},${y(v * 0.9)}`).reverse().join(' ');
+  svg.append(svgEl('polygon', { points: band, class: 'band' }));
+  svg.append(svgEl('polyline', { points: done.map((v, i) => `${x(i)},${y(v)}`).join(' '), class: 'line' }));
+  done.forEach((v, i) => {
+    const inBand = v >= planned[i] * 0.9 && v <= planned[i] * 1.1;
+    svg.append(svgEl('circle', { cx: x(i), cy: y(v), r: i === done.length - 1 ? 5 : 4, class: i === done.length - 1 ? 'now' : inBand ? 'in' : 'out' }));
+    if (ws.length <= 8 || i % 2 === 1) { const tx = svgEl('text', { x: x(i), y: H - 4, 'text-anchor': 'middle', class: 'tick' }); tx.textContent = `W${ws[i].number}`; svg.append(tx); }
+  });
+  return h('section', { class: 'gcard', 'aria-labelledby': 'h-vol' },
+    h('h2', { id: 'h-vol' }, 'Volume'),
+    h('p', { class: 'gdesc' }, 'How your endurance builds week after week, against the range the plan asked for.'),
+    h('div', { class: 'gbig' }, h('b', {}, avg ? avg.toFixed(1) : '—'), h('span', { class: 'unit' }, 'h / week, last 4 weeks')),
+    h('div', { class: 'vol' }, svg),
+    h('div', { class: 'legend' }, h('span', {}, h('i', { class: 'l-band' }), 'Plan range'), h('span', {}, h('i', { class: 'l-in' }), 'In range'), h('span', {}, h('i', { class: 'l-out' }), 'Outside'), h('span', {}, h('i', { class: 'l-now' }), 'This week (in progress)')));
+}
+
 function viewProgress() {
   const el = $('view-progress');
-  el.replaceChildren();
-  const all = state.plan.weeks.flatMap((w) => w.sessions);
-  const past = all.filter((s) => s.date < TODAY && s.type !== 'rest');
-  const doneCount = past.filter((s) => s.done).length + all.filter((s) => s.date >= TODAY && s.done).length;
-  const rate = past.length ? Math.round((past.filter((s) => s.done).length / past.length) * 100) : null;
-  const longest = all.filter((s) => s.type === 'long' && s.done).reduce((m, s) => Math.max(m, s.done.minutes), 0);
-  const easyFeel = all.filter((s) => s.done && s.effort === 'easy');
-  const felt = easyFeel.length ? Math.round((easyFeel.filter((s) => s.done.feel !== 'hard').length / easyFeel.length) * 100) : null;
-  const t = togo();
-
-  el.append(h('div', { class: 'view-head' }, h('div', {}, h('p', { class: 'label kick' }, `Week ${(weekOf(state.plan, TODAY)?.number) || '—'} of ${state.plan.totalWeeks}`), h('h1', { class: 'display', id: 'h-progress' }, 'Progress'))));
-  el.append(h('div', { class: 'stats' },
-    h('div', {}, h('span', { class: 'label' }, 'Sessions done'), h('b', { class: 'num' }, String(doneCount)), h('em', {}, rate == null ? 'Nothing due yet' : `${rate}% of what was due`)),
-    h('div', {}, h('span', { class: 'label' }, 'Longest run'), h('b', { class: 'num' }, longest ? fmtMin(longest) : '—'), h('em', {}, `Peak planned: ${fmtMin(state.plan.targets.longPeak)}`)),
-    h('div', {}, h('span', { class: 'label' }, 'Easy felt easy'), h('b', { class: `num${felt != null && felt >= 75 ? ' ok' : ''}` }, felt == null ? '—' : `${felt}%`), h('em', {}, 'Of easy sessions, by how they felt')),
-    h('div', {}, h('span', { class: 'label' }, 'To go'), h('b', { class: 'num' }, t ? String(t.n) : '—'), h('em', {}, t ? t.unit : 'Race done'))));
-
-  // Planned vs done, running hours per week, from week 1 to four weeks ahead.
-  const cur = weekOf(state.plan, TODAY)?.index ?? state.plan.weeks.length - 1;
-  const ws = state.plan.weeks.slice(Math.max(0, cur - 11), Math.min(state.plan.weeks.length, cur + 5));
-  const maxM = Math.max(...ws.map((w) => w.sessions.filter((s) => isRunType(s.type)).reduce((a, s) => a + s.minutes, 0)), 60);
-  const W = 640; const H = 200; const bw = W / ws.length;
-  const ns = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(ns, 'svg');
-  svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('preserveAspectRatio', 'none'); svg.setAttribute('role', 'img');
-  svg.setAttribute('aria-label', 'Running hours per week: planned outline, done filled.');
-  ws.forEach((w, i) => {
-    const plan = w.sessions.filter((s) => isRunType(s.type)).reduce((a, s) => a + s.minutes, 0);
-    const done = w.sessions.reduce((a, s) => a + (s.done && isRunType(s.type) ? s.done.minutes : 0), 0);
-    const x = i * bw + bw * 0.18; const wd = bw * 0.64;
-    const ph = (plan / maxM) * (H - 24); const dh = (Math.min(done, maxM) / maxM) * (H - 24);
-    const r1 = document.createElementNS(ns, 'rect');
-    Object.entries({ x, y: H - 18 - ph, width: wd, height: ph, fill: 'none', stroke: w.index > cur ? 'rgba(17,17,16,.18)' : 'rgba(17,17,16,.35)', 'stroke-width': 1, 'vector-effect': 'non-scaling-stroke' }).forEach(([k, v]) => r1.setAttribute(k, v));
-    svg.append(r1);
-    if (done) {
-      const r2 = document.createElementNS(ns, 'rect');
-      Object.entries({ x, y: H - 18 - dh, width: wd, height: dh, fill: w.index === cur ? '#F0602F' : '#3C7A4D' }).forEach(([k, v]) => r2.setAttribute(k, v));
-      svg.append(r2);
-    }
-    const tx = document.createElementNS(ns, 'text');
-    Object.entries({ x: x + wd / 2, y: H - 4, 'text-anchor': 'middle', fill: '#6E6A62', 'font-size': 10, 'font-family': '-apple-system, Inter, sans-serif' }).forEach(([k, v]) => tx.setAttribute(k, v));
-    tx.textContent = String(w.number);
-    svg.append(tx);
-  });
-  el.append(h('div', { class: 'chart' }, h('p', { class: 'label' }, 'Running hours per week'), svg,
-    h('div', { class: 'legend label' }, h('span', {}, h('i', { style: 'box-shadow:inset 0 0 0 1px rgba(17,17,16,.35)' }), 'Planned'), h('span', {}, h('i', { style: 'background:#3C7A4D' }), 'Done'), h('span', {}, h('i', { style: 'background:#F0602F' }), 'This week'))));
+  el.replaceChildren(goalHero(), h('div', { class: 'gcards' }, regularityCard(), volumeCard()));
 
   const watch = h('section', { class: 'watch', 'aria-labelledby': 'h-watch' },
     h('div', { class: 'sec-head' }, h('h2', { id: 'h-watch' }, 'From your watch'), h('span', { class: 'label' }, state.mode === 'demo' ? 'Demo runner · Strava data' : 'Strava')),
@@ -393,7 +454,10 @@ function viewCoach() {
 function viewSetup() {
   const el = $('view-setup');
   el.replaceChildren();
-  const c = state.config || {
+  const PRESETS = { trail25: { name: 'My first trail', km: 25, dplus: 900, weeks: 12, hours: 2.5 }, trail50: { name: 'Trail 50 km', km: 50, dplus: 2500, weeks: 18, hours: 4 }, ultra100: { name: 'Ultra 100 km', km: 100, dplus: 5000, weeks: 28, hours: 5 } };
+  const pr = PRESETS[state.program];
+  const c = (pr && { race: { name: pr.name, date: addDays(mondayOf(TODAY), pr.weeks * 7 + 5), km: pr.km, dplus: pr.dplus }, start: mondayOf(TODAY), runDays: [1, 3, 5], longRunDay: 5, strengthDays: [0, 4], noBackToBack: true, currentHours: pr.hours })
+    || state.config || {
     race: { name: '', date: '', km: '', dplus: '' }, start: mondayOf(TODAY), runDays: [1, 3, 5], longRunDay: 5, strengthDays: [0, 4], noBackToBack: true, currentHours: 3,
   };
   const dayBoxes = (name, sel) => h('div', { class: 'days' }, ...DAY_NAMES.map((d, i) => h('label', {}, h('input', { type: 'checkbox', name, value: String(i), checked: sel.includes(i), 'aria-label': DAY_LONG[i] }), h('span', { 'aria-hidden': 'true' }, d))));
@@ -413,7 +477,7 @@ function viewSetup() {
       const data = state.mode === 'demo' ? { config: v.config, log: { done: {}, moves: {} } } : await api('PUT', { config: v.config });
       state.config = data.config; state.log = data.log || { done: {}, moves: {} };
       rebuild(); state.weekIdx = weekOf(state.plan, TODAY)?.index ?? 0;
-      location.hash = '#today'; toast('Plan ready.');
+      state.program = null; location.hash = '#today'; toast('Plan ready.');
     } catch (x) { err.textContent = x.message; }
   } },
   h('fieldset', { class: 'form' },
@@ -448,7 +512,7 @@ const VIEWS = ['today', 'plan', 'progress', 'coach', 'setup', 'message'];
 function show(name) {
   for (const v of VIEWS) $(`view-${v}`).hidden = v !== name;
   document.querySelectorAll('[data-tab]').forEach((a) => { if (a.dataset.tab === name) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
-  document.title = `Isard — ${name[0].toUpperCase()}${name.slice(1)}`;
+  document.title = `Isard — ${({ progress: 'Goal' })[name] || name[0].toUpperCase() + name.slice(1)}`;
 }
 
 function render() {
@@ -467,6 +531,7 @@ async function boot() {
   const params = new URLSearchParams(location.search);
   const me = await fetch('/api/me').then((r) => r.json()).catch(() => ({ connected: false }));
   state.mode = params.get('mode') === 'live' && me.connected ? 'live' : params.get('mode') === 'demo' ? 'demo' : me.connected ? 'live' : 'demo';
+  state.program = params.get('program');
   history.replaceState({}, '', `/app?mode=${state.mode}${location.hash}`);
   $('mode').textContent = state.mode === 'demo' ? 'Demo' : 'Strava connected';
   $('avatar').textContent = state.mode === 'demo' ? 'D' : (me.athlete?.firstname || 'J')[0];
@@ -477,12 +542,7 @@ async function boot() {
   if (state.mode === 'demo') {
     state.config = validateConfig(demoConfig(TODAY)).config;
     await watchP;
-    // Demo strength sessions have no watch data: keep the synthetic log for those only.
-    const runDays = new Set(state.activities.map((a) => String(a.start_date_local).slice(0, 10)));
-    const synth = demoLog(generatePlan(state.config), TODAY);
-    const plan0 = generatePlan(state.config);
-    const typeOn = new Map(plan0.weeks.flatMap((w) => w.sessions).map((s) => [s.date, s.type]));
-    state.log = { moves: {}, done: Object.fromEntries(Object.entries(synth.done).filter(([d]) => !isRunType(typeOn.get(d)) || (!runDays.has(d) && d < addDays(TODAY, -21)))) };
+    state.log = demoLogFor(state.config, state.activities, TODAY);
   } else {
     try {
       const data = await api('GET');

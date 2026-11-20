@@ -10,15 +10,14 @@
     els.forEach(function(e){io.observe(e)});
   }
 
-  // Hero: slow parallax, only while the hero is on screen
-  var media=document.getElementById('heroMedia'), hero=document.querySelector('.hero'), ticking=false;
-  if(!reduce&&media){
+  // Desktop only: a slow parallax on the hero photo (iOS stutters on scroll-driven transforms).
+  var fine=window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  var hm=document.getElementById('heroMedia'), heroEl=document.querySelector('.hero'), tick=false;
+  if(fine&&!reduce&&hm){
+    d.classList.add('px');
     window.addEventListener('scroll',function(){
-      if(ticking)return; ticking=true;
-      requestAnimationFrame(function(){
-        var y=window.scrollY; if(y<hero.offsetHeight){media.style.transform='translate3d(0,'+(y*.22).toFixed(1)+'px,0)'}
-        ticking=false;
-      });
+      if(tick)return; tick=true;
+      requestAnimationFrame(function(){ var y=window.scrollY; if(y<heroEl.offsetHeight){hm.style.transform='translate3d(0,'+(y*.2).toFixed(1)+'px,0)'} tick=false; });
     },{passive:true});
   }
 
@@ -29,24 +28,6 @@
     if(reduce||saveData){v.removeAttribute('autoplay');v.pause();v.preload='none';v.remove();document.querySelector('.hero-media').classList.add('no-video')}
     else{var p=v.play&&v.play();if(p&&p.catch)p.catch(function(){})}
   }
-
-  // Course profile: the orange line follows your scroll through the section
-  var course=document.getElementById('course'), run=document.getElementById('courseRun');
-  var mks=[].slice.call(document.querySelectorAll('.mk'));
-  function drawCourse(){
-    var r=course.getBoundingClientRect(), vh=window.innerHeight;
-    var p=reduce?1:Math.min(1,Math.max(0,(vh*.9-r.top)/(vh*.75)));
-    run.style.strokeDashoffset=(1000*(1-p)).toFixed(1);
-    mks.forEach(function(m){m.classList.toggle('on',p>=parseFloat(m.dataset.at))});
-  }
-  if(course){drawCourse();window.addEventListener('scroll',function(){requestAnimationFrame(drawCourse)},{passive:true});window.addEventListener('resize',drawCourse)}
-
-  // Manifesto: slow parallax on the still
-  var man=document.getElementById('manMedia');
-  if(man&&!reduce){window.addEventListener('scroll',function(){requestAnimationFrame(function(){
-    var r=man.parentNode.getBoundingClientRect(), vh=window.innerHeight;
-    if(r.bottom>0&&r.top<vh){man.style.transform='translate3d(0,'+((r.top+r.height/2-vh/2)*-.08).toFixed(1)+'px,0)'}
-  })},{passive:true})}
 
   // App chapters: the phone shows the screen of the chapter in view (desktop)
   var chs=[].slice.call(document.querySelectorAll('.chapter')), shots=[].slice.call(document.querySelectorAll('.shot'));

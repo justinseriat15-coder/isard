@@ -347,3 +347,52 @@ export function matchActivities(plan, activities = []) {
   const extras = [...byDate.entries()].filter(([d]) => !used.has(d)).map(([date, acts]) => ({ date, activities: acts }));
   return { ...plan, weeks, extras };
 }
+
+// ---------- session cards: key, difficulty, distance estimate ----------
+// Key sessions are the ones that move the season: the long run, the quality run, race day.
+export const isKeySession = (s) => ['long', 'hills', 'steady', 'race'].includes(s.type);
+
+// Difficulty on 1-5, from the session type and how long it is. Rest is 0.
+export function sessionDifficulty(s) {
+  if (s.type === 'rest') return 0;
+  if (s.type === 'race') return 5;
+  if (s.type === 'hills') return 4;
+  if (s.type === 'steady') return 3;
+  if (s.type === 'strength') return 2;
+  if (s.type === 'long') return s.minutes >= 240 ? 4 : s.minutes >= 150 ? 3 : 2;
+  if (s.type === 'shakeout') return 1;
+  return s.minutes > 60 ? 2 : 1;
+}
+
+// Distance estimate from duration and the athlete's easy pace (sec/km). Trail long runs are
+// slower than easy flat pace; hills sessions cover less ground. Rounded to 0.5 km.
+export function estimateKm(s, easyPace = 400) {
+  if (!isRunType(s.type) || !s.minutes) return null;
+  const factor = s.type === 'long' ? 1.12 : s.type === 'hills' ? 1.1 : s.type === 'steady' ? 0.92 : 1;
+  return Math.round((s.minutes * 60) / (easyPace * factor) * 2) / 2;
+}
+
+// ---------- regularity: one column per week, one cell per session ----------
+// Cell states: done, missed, planned (future), extra (a run that was not in the plan).
+export function regularity(plan, today) {
+  const columns = plan.weeks.filter((w) => w.start <= today).map((w) => {
+    const cells = w.sessions.filter((s) => s.type !== 'rest').map((s) => (s.done ? 'done' : s.date < today ? 'missed' : 'planned'));
+    const extras = (plan.extras || []).filter((e) => e.date >= w.start && e.date <= addDays(w.start, 6)).length;
+    for (let i = 0; i < extras; i++) cells.push('extra');
+    return { number: w.number, cells };
+  });
+  const due = columns.flatMap((c) => c.cells).filter((c) => c === 'done' || c === 'missed');
+  const done = due.filter((c) => c === 'done').length;
+  return { columns, done, due: due.length, pct: due.length ? Math.round((done / due.length) * 100) : null };
+}
+
+// Demo log shared by the app and the coach, so both see the same week: runs come from the
+// fictional runner's watch data; strength sessions (no watch data) keep the synthetic log;
+// runs older than three weeks without watch data keep it too.
+export function demoLogFor(config, activities = [], today = isoDate()) {
+  const plan = generatePlan(config);
+  const synth = demoLog(plan, today);
+  const runDays = new Set(activities.map((a) => String(a.start_date_local).slice(0, 10)));
+  const typeOn = new Map(plan.weeks.flatMap((w) => w.sessions).map((s) => [s.date, s.type]));
+  return { moves: {}, done: Object.fromEntries(Object.entries(synth.done).filter(([d]) => !isRunType(typeOn.get(d)) || (!runDays.has(d) && d < addDays(today, -21)))) };
+}

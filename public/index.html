@@ -88,7 +88,7 @@ h1,h2,h3,p{margin:0}
 /* ---------------- Hero ---------------- */
 .hero{position:relative;min-height:100svh;min-height:640px;height:100svh;overflow:hidden;isolation:isolate;color:var(--bone)}
 @supports(height:100svh){.hero{min-height:620px}}
-.hero-media{position:absolute;inset:-6% 0 0;z-index:-2;will-change:transform;background:#3d4a5a}
+.hero-media{position:absolute;inset:0;z-index:-2;background:#3d4a5a}
 .hero-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:40% 70%}
 @media(max-width:699px){.hero-media{background:linear-gradient(180deg,#5d82c4 0%,#6a8fd0 100%)}.hero-media img{top:22%;height:78%;object-position:50% 0%;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 8%);mask-image:linear-gradient(180deg,transparent 0,#000 8%)}}
 .hero-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%}
@@ -199,7 +199,7 @@ h1,h2,h3,p{margin:0}
 
 /* ---------------- Manifesto: still from the hero footage ---------------- */
 .manifesto{position:relative;min-height:100svh;display:flex;align-items:flex-start;overflow:hidden;isolation:isolate}
-.manifesto .media{position:absolute;inset:-8% 0;z-index:-2;background:#1e2533 url(/media/manifesto.webp) 52% 60%/cover no-repeat;will-change:transform}
+.manifesto .media{position:absolute;inset:0;z-index:-2;background:#1e2533 url(/media/manifesto.webp) 52% 60%/cover no-repeat;}
 @media(max-width:699px){.manifesto .media{background-image:url(/media/manifesto-m.webp);background-position:50% 50%}}
 .manifesto .media::after{content:"";position:absolute;inset:0;opacity:.14;mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
@@ -526,11 +526,77 @@ footer a:hover{color:var(--bone)}
   .profile path{animation:none;stroke-dashoffset:0}
   .btn .arr,.btn{transition:none}
 }
+
+/* ================= Unified ground (v2) =================
+   One warm off-white page. Photos and dark moments live inside rounded cards
+   inset from the edges, so the page never "switches colour" edge to edge.
+   Pastels (peach, sage, sand) for the occasional highlighted card. */
+:root{--peach:#F4DFCB;--sage:#DCE5D6;--sand:#ECE5D8;--radius-xl:32px}
+body{background:var(--paper);color:var(--ink)}
+.light,.how,.product,.cred{background:var(--paper);color:var(--ink)}
+.folio{border-bottom:0;padding:clamp(56px,7vw,96px) 0 0}
+.folio .label{color:var(--stone-d)}
+.dark .folio .label:last-child,.folio .label:last-child{color:var(--stone-d)}
+/* hero: rounded foot, sits on the page instead of cutting it */
+.hero{border-radius:0 0 var(--radius-xl) var(--radius-xl);overflow:hidden}
+/* full-bleed photo sections become inset cards */
+.manifesto,.mono,.join{margin:16px var(--pad);border-radius:var(--radius-xl);min-height:min(86svh,820px);overflow:hidden;isolation:isolate;transform:translateZ(0)}
+.manifesto .media{inset:0}
+.join{min-height:min(92svh,860px)}
+/* bento: one dark card, one pastel card, one photo card */
+.t1{background:#1A1A18}
+.t2{background:var(--peach);color:var(--ink)}
+.t2 .tile-h .tn{opacity:.6}
+/* why it exists: on the page, not on black */
+.cred{color:var(--ink)}
+.cred h2{color:var(--ink)}
+.cred .story p{color:#2b2b27}
+.cred .sig{color:var(--stone-d)}
+.why-photo figcaption{color:#fff}
+.honest-h{color:var(--ink)}
+.honest-list li{border-top:0;background:#fff;border-radius:20px;padding:20px;margin-top:10px;box-shadow:0 1px 2px rgba(17,17,16,.05),0 8px 20px -12px rgba(17,17,16,.14)}
+.honest-list li:last-child{border-bottom:0}
+.honest-list b{color:var(--ink)}
+.honest-list p{color:var(--stone-d)}
+.honest-ph > img{border-radius:var(--radius-xl)}
+.coach-card{background:#fff}
+/* footer: same ground */
+footer.dark{background:var(--paper);color:var(--stone-d)}
+footer .logo{color:var(--ink)}
+footer a:hover{color:var(--ink)}
+
+.sync{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding-top:clamp(40px,5vw,64px)}
+.sync .label{color:var(--stone-d);margin-right:4px}
+.sync-pill{display:inline-flex;align-items:center;gap:8px;background:#fff;border-radius:999px;padding:9px 14px;font-family:var(--display);font-variation-settings:"wdth" 100;font-weight:600;font-size:.86rem;box-shadow:0 1px 2px rgba(17,17,16,.05),0 6px 16px -10px rgba(17,17,16,.2)}
+.sync-pill i{width:10px;height:10px;border-radius:3px;display:block}
+.sync-pill .sv{background:#FC4C02}
+.sync-pill .mn{background:var(--ink)}
+.programs{background:var(--paper);padding-bottom:clamp(40px,6vw,80px)}
+.programs h2{font-size:clamp(2.6rem,7vw,5.6rem);margin-top:clamp(32px,5vw,56px);max-width:14ch}
+.prog-row{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:var(--pad);-webkit-overflow-scrolling:touch;margin:clamp(28px,4vw,48px) calc(var(--pad) * -1) 0;padding:4px var(--pad) 16px;scrollbar-width:none}
+.prog-row::-webkit-scrollbar{display:none}
+.prog{position:relative;flex:0 0 min(78vw,340px);aspect-ratio:4/5;border-radius:28px;overflow:hidden;scroll-snap-align:start;text-decoration:none;color:#fff;isolation:isolate;display:flex;align-items:flex-end}
+.prog img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;transition:transform .8s var(--ease)}
+.prog::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(14,15,13,0) 45%,rgba(14,15,13,.75))}
+.prog:hover img{transform:scale(1.04)}
+.prog-t{padding:22px}
+.prog-t b{display:block;font-family:var(--display);font-variation-settings:"wdth" 62;font-weight:800;text-transform:uppercase;font-size:2.2rem;line-height:.9}
+.prog-t em{display:block;font-style:normal;font-family:var(--display);font-variation-settings:"wdth" 100;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;margin-top:8px;opacity:.9}
+.prog-own{background:var(--peach);color:var(--ink);flex-direction:column;justify-content:space-between;align-items:flex-start}
+.prog-own::before{display:none}
+.prog-own .arr{font-family:var(--display);font-size:2rem;padding:0 22px 22px;color:var(--signal)}
+.prog-own .prog-t{order:-1}
+@media(min-width:900px){.prog-row{margin-inline:0;padding-inline:0}.prog{flex-basis:calc((100% - 48px) / 4)}}
+@media(prefers-reduced-motion:reduce){.prog img{transition:none}}
+.join .folio .label,.join .folio .label:last-child{color:rgba(236,230,218,.85)}
+@media(max-width:899px){.prog{scroll-snap-align:center}.prog-row{scroll-padding-inline:0}}
+.legs img,.why-photo video{border-radius:28px}
+.px .hero-media{inset:-6% 0 0;will-change:transform}
+@media (hover:none){.hero-grain,.manifesto .media::after,.mono::after{display:none}}
 </style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<div class="grain" aria-hidden="true"></div>
 
 <header class="nav">
   <div class="wrap">
@@ -587,6 +653,11 @@ footer a:hover{color:var(--bone)}
 <!-- ================= HOW IT WORKS ================= -->
 <section class="light how" id="how" aria-labelledby="how-title">
   <div class="wrap">
+    <div class="sync rv" aria-label="Works with">
+      <span class="label">Works with</span>
+      <span class="sync-pill"><i class="sv"></i>Strava</span>
+      <span class="sync-pill"><i class="mn"></i>Manual logging</span>
+    </div>
     <div class="folio"><span class="label">01 — How it works</span><span class="label">Your season, as a course</span></div>
     <div class="grid">
       <h2 class="display rv" id="how-title">You bring <span class="it">the</span> legs.</h2>
@@ -633,11 +704,37 @@ footer a:hover{color:var(--bone)}
   </div>
 </section>
 
+<!-- ================= PROGRAMS ================= -->
+<section class="programs" aria-labelledby="prog-title">
+  <div class="wrap">
+    <div class="folio"><span class="label">02 — Pick your distance</span><span class="label">Opens the demo, pre-filled</span></div>
+    <h2 class="display rv" id="prog-title">From your first 20 km to 175.</h2>
+    <div class="prog-row">
+        <a class="prog" href="/app?program=trail25&amp;mode=demo#setup">
+          <img src="/media/legs.webp" alt="" loading="lazy" decoding="async">
+          <span class="prog-t"><b>First trail</b><em>20–30 km · from 10 weeks</em></span>
+        </a>
+        <a class="prog" href="/app?program=trail50&amp;mode=demo#setup">
+          <img src="/media/mud.webp" alt="" loading="lazy" decoding="async">
+          <span class="prog-t"><b>Trail 50 km</b><em>2,500 m D+ · from 16 weeks</em></span>
+        </a>
+        <a class="prog" href="/app?program=ultra100&amp;mode=demo#setup">
+          <img src="/media/manifesto.webp" alt="" loading="lazy" decoding="async">
+          <span class="prog-t"><b>Ultra 100 km+</b><em>5,000 m D+ · from 24 weeks</em></span>
+        </a>
+        <a class="prog prog-own" href="/app?mode=demo#setup">
+          <span class="prog-t"><b>Your race</b><em>Any distance, any date. Two minutes.</em></span>
+          <span class="arr" aria-hidden="true">→</span>
+        </a>
+    </div>
+  </div>
+</section>
+
 <!-- ================= MANIFESTO ================= -->
 <section class="manifesto dark" aria-label="Manifesto">
   <!-- Photo: runner in the fog at first light (/media/manifesto.jpg desktop crop, /media/manifesto-m.jpg mobile). -->
   <div class="media" id="manMedia" aria-hidden="true"></div>
-  <div class="top"><div class="wrap"><span class="label">02</span><span class="label">The part no app does for you</span></div></div>
+  <div class="top"><div class="wrap"><span class="label">03</span><span class="label">The part no app does for you</span></div></div>
   <div class="wrap grid">
     <blockquote>
       <p class="q rv">Nobody is watching at 5&nbsp;a.m.<br class="dbr"> <span>That's the whole point.</span></p>
@@ -648,7 +745,7 @@ footer a:hover{color:var(--bone)}
 <!-- ================= PRODUCT ================= -->
 <section class="light product" id="plan" aria-labelledby="plan-title">
   <div class="wrap">
-    <div class="folio"><span class="label">03 — The app</span><span class="label">Week 14 of 31</span></div>
+    <div class="folio"><span class="label">04 — The app</span><span class="label">Week 14 of 31</span></div>
     <div class="grid">
       <div class="head"><h2 class="display rv" id="plan-title">Every session tells you why.</h2></div>
     </div>
@@ -738,7 +835,7 @@ footer a:hover{color:var(--bone)}
 <!-- ================= CREDIBILITY ================= -->
 <section class="dark cred" id="why" aria-labelledby="why-title">
   <div class="wrap">
-    <div class="folio"><span class="label">04 — Why it exists</span><span class="label">London · Gulf of Morbihan</span></div>
+    <div class="folio"><span class="label">05 — Why it exists</span><span class="label">London · Gulf of Morbihan</span></div>
     <div class="grid">
       <div class="why-text">
       <h2 class="display rv" id="why-title">Built for one race first.</h2>
@@ -797,7 +894,7 @@ footer a:hover{color:var(--bone)}
 <section class="join" id="join" aria-labelledby="join-title">
   <!-- Background: /media/join.jpg (desktop) / /media/join-m.jpg (mobile), blue hour before sunrise. -->
   <div class="wrap">
-    <div class="folio"><span class="label">05 — Waitlist</span><span class="label">Runners coached today: 1</span></div>
+    <div class="folio"><span class="label">06 — Waitlist</span><span class="label">Runners coached today: 1</span></div>
     <div class="grid top">
       <h2 class="display rv" id="join-title">Start where<br> <em>you are.</em></h2>
     </div>

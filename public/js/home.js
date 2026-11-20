@@ -10,6 +10,17 @@
     els.forEach(function(e){io.observe(e)});
   }
 
+  // Desktop only: a slow parallax on the hero photo (iOS stutters on scroll-driven transforms).
+  var fine=window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  var hm=document.getElementById('heroMedia'), heroEl=document.querySelector('.hero'), tick=false;
+  if(fine&&!reduce&&hm){
+    d.classList.add('px');
+    window.addEventListener('scroll',function(){
+      if(tick)return; tick=true;
+      requestAnimationFrame(function(){ var y=window.scrollY; if(y<heroEl.offsetHeight){hm.style.transform='translate3d(0,'+(y*.2).toFixed(1)+'px,0)'} tick=false; });
+    },{passive:true});
+  }
+
   // Hero video: poster only for reduced motion or Save-Data
   var v=document.getElementById('heroVideo');
   if(v){

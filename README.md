@@ -1,4 +1,4 @@
-# Trail.AI
+# Isard (Trail.AI)
 
 Trail and ultra training plans that explain themselves, with endurance analytics on Strava data and an LLM coach that only reasons over metrics computed server-side.
 
@@ -15,13 +15,11 @@ Trail and ultra training plans that explain themselves, with endurance analytics
 
 Plans and logged sessions are stored in Postgres (Neon, `DATABASE_URL`) via `/api/plan`. The demo builds its plan in the browser and saves nothing.
 
-**Live demo:** https://trail-dashboard-one.vercel.app/?mode=demo (fictional athlete, 16 weeks of synthetic data) · **[How it's built](https://trail-dashboard-one.vercel.app/how-its-built.html)**
-
-![Architecture](https://img.shields.io/badge/stack-Vercel%20Functions%20·%20Strava%20API%20·%20Claude%20API-1a1a19)
+**Live:** https://trail-dashboard-one.vercel.app · **Demo:** [/app?mode=demo](https://trail-dashboard-one.vercel.app/app?mode=demo) (fictional runner) · **[How it's built](https://trail-dashboard-one.vercel.app/how-its-built)**
 
 ## What it does
 
-A Today verdict (train, easy day or rest) in one sentence, five plain metrics behind it, a race readiness gauge, and a coach you can talk to. You write *"good run this morning, heavy legs at the start"*; the coach identifies which Strava activity you mean, pulls its second-by-second streams, and crosses your feeling with the numbers.
+Today's session first: how long, how hard it should feel (in words), and why it is there. A week you can rearrange without breaking your own rules. Strava runs tick sessions off on their own. Progress shows the plan against what was done, plus the watch metrics below. A coach you can ask anything answers from your runs only.
 
 | Metric | Definition | Why it matters |
 |---|---|---|
@@ -29,9 +27,6 @@ A Today verdict (train, easy day or rest) in one sentence, five plain metrics be
 | **Easy share** | % of running time in heart-rate zones 1-2, from sessions with HR data | About 80% easy keeps hard days hard. |
 | **Climbing speed** | Vertical metres per hour on sustained climbs (50 m or more of gain at 3% grade or steeper), 3-week average | The trail-specific fitness number. |
 | **Aerobic engine** | Pace at your easy heart rate, from flat easy runs of 20 minutes or more | If this gets faster at the same heart rate, the aerobic base is improving. |
-| **Cardiac drift** (per session) | Heart rate rise in the second half of a steady flat run vs the first, after warm-up | Under 5% means durable endurance at that duration. |
-
-**Race readiness** checks two rules of thumb over the last 12 weeks against a target race: longest run (vs 2/3 of the race distance up to 60 km; for ultras the rule switches to time on feet, about 5.5 h) and biggest week of climbing vs the race D+. There is no average: the score is the weaker of the two, and the card leads with the limiting factor. Climbing speed is shown as context only, because training speed on short fresh climbs is not comparable to race-average climbing speed. The demo uses a fictional 50 km / 2,500 m race; live mode reads the owner's race from the `RACE_TARGET` setting.
 
 Internally the model uses heart-rate load (a Banister-style impulse), acute vs chronic load and efficiency factor; the interface and the coach only use the plain terms above.
 
@@ -52,30 +47,34 @@ flowchart LR
 ```
 
 ```
-public/            static frontend (vanilla JS + Chart.js)
+public/            static frontend (vanilla JS, no framework, no build step)
+  index.html       landing · app.html + app.css the app · how-its-built.html
   js/analytics.js  pure metric functions, shared by browser and server
   js/demo-data.js  deterministic synthetic athlete (seeded PRNG, Strava-shaped)
   js/watch.js      watch metrics for Progress (analytics.js on /api/activities)
   js/coach.js      coach chat (streams /api/chat)
+  js/plan.js       training plan engine (pure), shared by browser and server
+  js/today.js      the app: Today, Plan, Progress, Coach
 api/               serverless endpoints
   auth/login       → Strava consent, CSRF state cookie
   auth/callback    → code exchange server-side, encrypted session
   activities       → activities + HR profile (demo or live)
   streams          → per-second streams of one activity
   chat             → coach agent (tool loop) with SSE step + text streaming
+  plan             → the athlete's plan and log (re-validates every change)
+  waitlist         → email sign-ups
 lib/               session crypto, Strava client, prompt builder, agent loop, rate limiter
-  plan.js          training plan engine (pure), shared by browser and server
-  js/today.js      the app: Today, Plan, Progress, Coach
+  db.js            Postgres (Neon) over HTTP, idempotent schema
 tests/             node:test unit tests (metrics, session crypto, agent loop) + live eval harness (`npm run eval`)
 ```
 
 ## The coach agent
 
-One model call decides for itself what it needs: no router, no forced tool use. The cached system prompt covers current state (load, trends, last ~15 sessions); three tools cover the rest - `list_activities` (any date window), `get_activity_details` (second-by-second zones, splits, laps, cardiac drift) and `compute_stats` (the same deterministic functions the dashboard uses: summary, climbing and engine trends, weekly volume, race readiness). The loop is capped at 8 model calls and always ends on a call without tools, so it must produce a written answer. Live Strava calls are budgeted at 6 per question. The visible steps in the chat are built only from the model's `tool_use` blocks, and the reply is streamed as server-sent events.
+One model call decides for itself what it needs: no router, no forced tool use. The cached system prompt covers current state (load, trends, last ~15 sessions); three tools cover the rest - `list_activities` (any date window), `get_activity_details` (second-by-second zones, splits, laps, cardiac drift) and `compute_stats` (the same deterministic functions the app uses: summary, climbing and engine trends, weekly volume, race readiness). The loop is capped at 8 model calls and always ends on a call without tools, so it must produce a written answer. Live Strava calls are budgeted at 6 per question. The visible steps in the chat are built only from the model's `tool_use` blocks, and the reply is streamed as server-sent events.
 
 ## Design decisions
 
-**Secrets never reach the browser.** The OAuth code exchange and token refresh run in serverless functions. Tokens live in an AES-256-GCM encrypted, `httpOnly`, `Secure`, `SameSite=Lax` cookie: the client holds an opaque blob it can neither read nor forge. No database needed: the session is stateless.
+**Secrets never reach the browser.** The OAuth code exchange and token refresh run in serverless functions. Tokens live in an AES-256-GCM encrypted, `httpOnly`, `Secure`, `SameSite=Lax` cookie: the client holds an opaque blob it can neither read nor forge. The session itself is stateless; only plans and the waitlist live in Postgres.
 
 **The model is grounded, not trusted with raw input.** The browser sends only the conversation text. The server fetches the athlete's data itself, computes the metrics, and builds the system prompt. A user cannot inject fake training data, and every recommendation must cite a number from that context.
 

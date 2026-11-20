@@ -1,116 +1,162 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>How it's built - Trail.AI</title>
-<meta name="description" content="The engineering behind Trail.AI: server-computed endurance metrics, a Claude agent with three data tools, and a security model that keeps secrets off the browser.">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>How it's built — Isard</title>
+<meta name="description" content="The engineering behind Isard: a rules-based training plan engine, server-computed endurance metrics, and a grounded Claude agent with three data tools.">
+<meta name="theme-color" content="#F4F2EE">
 <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/newsreader-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/fonts/fonts.css">
-<link rel="stylesheet" href="/styles.css">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230E0F0D'/%3E%3Crect x='14' y='15' width='36' height='9' fill='%23ECE6DA'/%3E%3Crect x='27.5' y='15' width='9' height='35' fill='%23ECE6DA'/%3E%3Crect x='42' y='42' width='9' height='9' transform='rotate(45 46.5 46.5)' fill='%23F0602F'/%3E%3C/svg%3E">
+<link rel="icon" href="/img/isard-icon.svg" type="image/svg+xml">
 <style>
-  .doc { --gutter: clamp(16px, 4vw, 40px); }
-  .doc section, .doc-foot { max-width: 760px; margin: 0 auto; padding: 0 var(--gutter); }
-  .doc-hero { padding-top: clamp(48px, 8vw, 88px); padding-bottom: 8px; }
-  .doc-hero h1 { font-family: var(--sans); font-stretch: 68%; font-weight: 850; font-size: clamp(40px, 7vw, 72px); line-height: .95; letter-spacing: -.015em; margin-bottom: 20px; }
-  .doc-hero h1 span { color: var(--text-3); }
-  .doc-hero .lede { margin-bottom: 0; }
-  .doc h2 { font-family: var(--sans); font-stretch: 78%; font-weight: 800; font-size: clamp(22px, 2.6vw, 28px); line-height: 1.1; letter-spacing: -.01em; margin: clamp(40px, 6vw, 64px) 0 14px; padding-top: clamp(24px, 4vw, 32px); border-top: 1px solid var(--border); }
-  .doc h3 { font-size: 15px; font-weight: 700; margin: 22px 0 6px; }
-  .doc p { color: var(--text-2); margin-bottom: 12px; max-width: 68ch; }
-  .doc p b, .doc li b { color: var(--text); }
-  .doc ul { color: var(--text-2); padding-left: 20px; margin-bottom: 12px; }
-  .doc li { margin-bottom: 6px; }
-  .doc code { font-family: var(--mono); font-size: 13px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; color: var(--text); }
-  .doc .toolcard { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 16px; margin: 10px 0; }
-  .doc .toolcard b { font-family: var(--mono); font-size: 13px; color: var(--brand-2); font-weight: 500; }
-  .doc .toolcard p { margin: 6px 0 0; font-size: 14px; }
-  .doc .flow { display: grid; gap: 8px; margin: 16px 0; }
-  .doc .flow div { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 16px; font-size: 14px; color: var(--text-2); }
-  .doc .flow div b { display: block; color: var(--text); margin-bottom: 2px; }
-  .doc .flow .accent { border-color: var(--brand); }
-  .doc .foot { max-width: 760px; }
-  .doc .back { display: inline-block; margin-bottom: 8px; font-size: 13px; }
+:root{--bg:#F4F2EE;--surf:#fff;--surf2:#ECE9E3;--text:#111110;--muted:#6E6A62;--line:rgba(17,17,16,.08);--accent:#F0602F;--card:#141413;--card-text:#F4F2EE;--card-muted:#A39D92;
+  --shadow:0 1px 2px rgba(17,17,16,.05),0 8px 20px -10px rgba(17,17,16,.14);
+  --ui:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;--display:"Archivo","Arial Narrow",sans-serif;--serif:"Newsreader",Georgia,serif;--pad:clamp(18px,5vw,48px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:400 1.06rem/1.6 var(--serif);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.bar{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.bar-in{max-width:1100px;margin:0 auto;padding:0 var(--pad);height:60px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.logo{display:inline-flex;line-height:0;color:var(--text)}
+.logo svg{height:22px;width:auto}
+.bar nav{display:flex;gap:8px}
+.pill{font:600 .86rem/1 var(--ui);text-decoration:none;padding:10px 16px;border-radius:999px;background:var(--surf);box-shadow:var(--shadow)}
+.pill.o{background:var(--accent);box-shadow:none}
+main{max-width:1100px;margin:0 auto;padding:0 var(--pad) 80px}
+.hero{padding:clamp(48px,8vw,104px) 0 clamp(32px,5vw,56px)}
+.kick{font:600 .78rem/1 var(--ui);color:var(--accent);letter-spacing:.02em}
+h1{font-family:var(--display);font-variation-settings:"wdth" 62;font-weight:800;text-transform:uppercase;font-size:clamp(3.4rem,10vw,7.4rem);line-height:.86;margin:14px 0 0;letter-spacing:-.005em}
+.lede{font-size:clamp(1.2rem,2vw,1.45rem);line-height:1.45;max-width:40ch;margin:24px 0 0}
+.facts{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:40px}
+@media(min-width:800px){.facts{grid-template-columns:repeat(4,1fr)}}
+.facts div{background:var(--surf);border-radius:18px;padding:16px 18px;box-shadow:var(--shadow)}
+.facts b{display:block;font-family:var(--display);font-variation-settings:"wdth" 62;font-weight:900;font-size:2.6rem;line-height:.9}
+.facts span{display:block;font:500 .86rem/1.3 var(--ui);color:var(--muted);margin-top:6px}
+section{display:grid;gap:12px 48px;padding:clamp(40px,6vw,72px) 0;border-top:1px solid var(--line)}
+@media(min-width:900px){section{grid-template-columns:minmax(0,4fr) minmax(0,7fr)}}
+section > header .n{font:700 .8rem/1 var(--ui);color:var(--accent)}
+h2{font-family:var(--display);font-variation-settings:"wdth" 62;font-weight:800;text-transform:uppercase;font-size:clamp(2rem,4vw,3rem);line-height:.9;margin:10px 0 0}
+section p{margin:0 0 14px;max-width:62ch}
+section p:last-child{margin-bottom:0}
+b,strong{font-family:var(--ui);font-weight:650;font-size:.95em}
+code{font:500 .86em/1 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--surf2);padding:2px 6px;border-radius:6px}
+.cards{display:grid;gap:10px;margin:18px 0}
+.card{background:var(--surf);border-radius:16px;padding:14px 16px;box-shadow:var(--shadow);font:400 .96rem/1.45 var(--ui);color:var(--muted)}
+.card b{display:block;color:var(--text);font-size:1rem;margin-bottom:2px}
+.card code{background:transparent;padding:0;color:var(--accent)}
+.flow{display:grid;gap:8px;margin:18px 0;counter-reset:f}
+.flow div{background:var(--surf);border-radius:16px;padding:14px 16px 14px 52px;box-shadow:var(--shadow);font:400 .96rem/1.45 var(--ui);color:var(--muted);position:relative}
+.flow div::before{counter-increment:f;content:counter(f);position:absolute;left:16px;top:14px;width:24px;height:24px;border-radius:50%;background:var(--surf2);color:var(--text);font:700 .8rem/24px var(--ui);text-align:center}
+.flow div.hl{background:var(--card);color:var(--card-muted)}
+.flow div.hl::before{background:var(--accent);color:var(--text)}
+.flow div b{display:block;color:inherit;font-size:1rem}
+.flow div.hl b{color:var(--card-text)}
+ul.rules{list-style:none;padding:0;margin:16px 0}
+ul.rules li{padding:12px 0 12px 22px;border-top:1px solid var(--line);position:relative;font:400 .98rem/1.5 var(--ui);color:var(--muted)}
+ul.rules li::before{content:"";position:absolute;left:2px;top:20px;width:8px;height:8px;background:var(--accent);transform:rotate(45deg)}
+ul.rules li b{color:var(--text)}
+footer{max-width:1100px;margin:0 auto;padding:28px var(--pad) 48px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;font:500 .9rem/1.4 var(--ui);color:var(--muted)}
+footer a{color:var(--text)}
 </style>
 </head>
 <body>
-
-<header class="topbar">
-  <a class="logo" href="/">TRAIL<span>.</span>AI</a>
-  <div class="topbar-right">
-    <a class="btn-ghost" href="/">Home</a>
+<header class="bar">
+  <div class="bar-in">
+    <a class="logo" href="/" aria-label="Isard, home"><svg viewBox="34 56 420 116" aria-hidden="true" focusable="false"><g fill="currentColor"><path d="M40.00,166.00 C43.48,140.00 46.92,112.00 51.52,92.00 C55.20,76.00 65.04,68.00 76.08,70.00 C86.12,72.00 91.32,82.00 90.72,102.00 C86.50,91.00 81.40,86.00 75.42,87.00 C69.44,88.00 67.60,96.00 66.80,106.00 C65.20,126.00 63.60,146.00 62.00,166.00 Z M76.00,160.00 C81.04,134.00 86.16,106.00 91.96,86.00 C96.60,70.00 106.92,62.00 117.84,64.00 C127.76,66.00 132.36,76.00 130.56,96.00 C127.00,85.00 122.20,80.00 116.16,81.00 C110.12,82.00 107.80,90.00 106.40,100.00 C103.60,120.00 100.80,140.00 98.00,160.00 Z"/><path d="M173.632 158.464V71.93599999999999Q173.632 71.29599999999999 174.07999999999998 70.84799999999998Q174.528 70.39999999999999 175.168 70.39999999999999H190.144Q190.784 70.39999999999999 191.232 70.84799999999998Q191.68 71.29599999999999 191.68 71.93599999999999V158.464Q191.68 159.104 191.232 159.55200000000002Q190.784 160.0 190.144 160.0H175.168Q174.528 160.0 174.07999999999998 159.55200000000002Q173.632 159.104 173.632 158.464Z M203.84 137.6V133.888Q203.84 133.248 204.288 132.8Q204.736 132.352 205.376 132.352H220.096Q220.736 132.352 221.184 132.8Q221.632 133.248 221.632 133.888V136.704Q221.632 140.672 223.68 143.10399999999998Q225.728 145.536 228.8 145.536Q231.872 145.536 233.92000000000002 143.232Q235.96800000000002 140.928 235.96800000000002 137.216Q235.96800000000002 133.376 233.40800000000002 130.624Q230.848 127.872 223.424 122.49600000000001Q217.024 117.888 213.05599999999998 114.304Q209.088 110.72 206.272 105.472Q203.456 100.22399999999999 203.456 93.312Q203.456 82.432 210.24 75.904Q217.024 69.376 228.16 69.376Q239.424 69.376 246.272 76.16Q253.12 82.944 253.12 93.952V97.024Q253.12 97.664 252.672 98.112Q252.224 98.56 251.584 98.56H236.864Q236.224 98.56 235.776 98.112Q235.328 97.664 235.328 97.024V93.568Q235.328 89.6 233.344 87.232Q231.36 84.864 228.16 84.864Q225.088 84.864 223.168 87.104Q221.248 89.344 221.248 93.312Q221.248 97.152 223.68 100.096Q226.112 103.03999999999999 233.28 108.288Q241.216 114.176 245.248 117.82400000000001Q249.28 121.47200000000001 251.51999999999998 125.888Q253.76 130.304 253.76 136.448Q253.76 147.712 246.848 154.368Q239.936 161.024 228.672 161.024Q221.248 161.024 215.61599999999999 158.07999999999998Q209.984 155.136 206.912 149.824Q203.84 144.512 203.84 137.6Z M300.992 158.592 298.944 146.304Q298.944 145.664 298.176 145.664H281.92Q281.152 145.664 281.152 146.304L279.104 158.592Q278.976 160.0 277.44 160.0H262.464Q260.8 160.0 261.18399999999997 158.336L280.0 71.80799999999999Q280.256 70.39999999999999 281.664 70.39999999999999H298.944Q300.352 70.39999999999999 300.608 71.80799999999999L319.296 158.336L319.424 158.848Q319.424 160.0 318.016 160.0H302.656Q301.12 160.0 300.992 158.592ZM284.224 131.712H295.744Q296.384 131.712 296.256 131.072L290.24 96.128Q290.11199999999997 95.744 289.856 95.744Q289.6 95.744 289.472 96.128L283.712 131.072Q283.712 131.712 284.224 131.712Z M362.81600000000003 158.72 352.96000000000004 123.392Q352.704 122.88 352.32000000000005 122.88H347.968Q347.32800000000003 122.88 347.32800000000003 123.52V158.464Q347.32800000000003 159.104 346.88 159.55200000000002Q346.432 160.0 345.79200000000003 160.0H330.81600000000003Q330.17600000000004 160.0 329.72800000000007 159.55200000000002Q329.28000000000003 159.104 329.28000000000003 158.464V71.93599999999999Q329.28000000000003 71.29599999999999 329.72800000000007 70.84799999999998Q330.17600000000004 70.39999999999999 330.81600000000003 70.39999999999999H356.672Q363.71200000000005 70.39999999999999 369.216 73.792Q374.72 77.184 377.72800000000007 83.328Q380.73600000000005 89.472 380.73600000000005 97.408Q380.73600000000005 104.96000000000001 377.856 110.72Q374.976 116.47999999999999 369.856 119.68Q369.6 119.80799999999999 369.47200000000004 120.0Q369.34400000000005 120.19200000000001 369.47200000000004 120.44800000000001L381.24800000000005 158.208L381.37600000000003 158.72Q381.37600000000003 160.0 379.968 160.0H364.608Q363.20000000000005 160.0 362.81600000000003 158.72ZM347.32800000000003 86.52799999999999V108.416Q347.32800000000003 109.056 347.968 109.056H353.728Q357.696 109.056 360.192 105.91999999999999Q362.68800000000005 102.78399999999999 362.68800000000005 97.536Q362.68800000000005 92.16 360.192 89.024Q357.696 85.888 353.728 85.888H347.968Q347.32800000000003 85.888 347.32800000000003 86.52799999999999Z M392.12800000000004 158.464V71.93599999999999Q392.12800000000004 71.29599999999999 392.576 70.84799999999998Q393.02400000000006 70.39999999999999 393.66400000000004 70.39999999999999H416.83200000000005Q428.48 70.39999999999999 435.52000000000004 77.184Q442.56000000000006 83.968 442.56000000000006 95.232V135.168Q442.56000000000006 146.432 435.52000000000004 153.216Q428.48 160.0 416.83200000000005 160.0H393.66400000000004Q393.02400000000006 160.0 392.576 159.55200000000002Q392.12800000000004 159.104 392.12800000000004 158.464ZM410.81600000000003 144.512 416.576 144.38400000000001Q420.03200000000004 144.256 422.208 141.44Q424.384 138.624 424.51200000000006 134.016V96.384Q424.51200000000006 91.52 422.336 88.70400000000001Q420.16 85.888 416.44800000000004 85.888H410.81600000000003Q410.17600000000004 85.888 410.17600000000004 86.52799999999999V143.872Q410.17600000000004 144.512 410.81600000000003 144.512Z"/></g></svg></a>
+    <nav aria-label="Links"><a class="pill" href="/">Home</a><a class="pill o" href="/app?mode=demo">Try the demo</a></nav>
   </div>
 </header>
 
-<main class="doc">
-  <section class="doc-hero">
-    <h1>How it's built<span>.</span></h1>
-    <p class="lede">Trail.AI is a personal training dashboard that turns Strava data into endurance metrics, then lets an AI coach reason over those numbers. This page walks through the engineering: the metrics engine, the agent design, the security model, and how it's tested. <a href="https://github.com/justinseriat15-coder/trail-ai" target="_blank" rel="noopener">Full source on GitHub</a>.</p>
-  </section>
+<main>
+  <div class="hero">
+    <p class="kick">How it's built</p>
+    <h1>Rules plan.<br>Data decide.<br>The model explains.</h1>
+    <p class="lede">Isard builds a trail or ultra season from a two-minute brief, ticks sessions off from Strava, and lets an AI coach answer questions about the training without ever inventing a number.</p>
+    <div class="facts">
+      <div><b>0 €</b><span>model cost to build a plan: rules in code</span></div>
+      <div><b>116</b><span>unit and integration tests, on every push</span></div>
+      <div><b>21</b><span>grounding questions run against the real coach on every pull request</span></div>
+      <div><b>0</b><span>frameworks or build steps: vanilla JS, served as is</span></div>
+    </div>
+  </div>
 
   <section>
-    <h2>The stack</h2>
-    <div class="flow">
-      <div><b>Browser</b>Static HTML, vanilla JS and Chart.js. No framework, no build step, no secrets.</div>
-      <div class="accent"><b>Vercel serverless functions (Node)</b>Strava OAuth, encrypted session, metrics engine, prompt builder, agent loop, rate limiting.</div>
-      <div><b>Strava API</b>Activities, laps and second-by-second streams (heart rate, pace, altitude).</div>
-      <div><b>Claude API (Anthropic)</b>The coach. Sonnet for the signed-in athlete, Haiku for the public demo.</div>
+    <header><span class="n">01</span><h2>The plan engine</h2></header>
+    <div>
+      <p>A plan is generated by pure, deterministic functions in <code>plan.js</code>, shared by the browser and the server. No model call: it is free, predictable and testable, and the coach explains the plan rather than writing it.</p>
+      <ul class="rules">
+        <li><b>Season shape.</b> Base, build, peak and taper in 45 / 35 / 20 proportions, one or two taper weeks, a lighter week every fourth week.</li>
+        <li><b>Safe progression.</b> The long run and the midweek runs each grow by 10% a week at most, and peak volume never exceeds twice the starting volume.</li>
+        <li><b>The athlete's own rules.</b> "Never two run days in a row" is enforced when the plan is built and on every move, in the browser and again on the server, which re-checks each change before saving it.</li>
+        <li><b>Every session explains itself.</b> Effort in words ("you can hold a conversation") and one or two sentences on why the session is there.</li>
+      </ul>
+      <p>Strava runs complete planned sessions automatically: a run on the day of a planned run marks it done, a manual log always wins, and runs on rest days are shown as extras without bending the plan.</p>
     </div>
   </section>
 
   <section>
-    <h2>Metrics before words</h2>
-    <p>The coach never sees raw GPS files or guesswork. Every session is first reduced to computed metrics by one module of pure functions, shared verbatim between the browser (for the charts) and the server (for the agent's tools), so the number on a chart and the number in a coaching answer can never diverge. Both speak the same five plain questions:</p>
-    <ul>
-      <li><b>Load vs usual</b> - heart-rate load of the last 7 days against the average week of the 4 before. Big spikes are what get runners hurt.</li>
-      <li><b>Easy share</b> - the share of running time in heart-rate zones 1-2. Around 80% keeps hard days hard.</li>
-      <li><b>Climbing speed</b> - vertical metres per hour on sustained climbs (50 m or more at 3% grade or steeper), found from altitude streams.</li>
-      <li><b>Aerobic engine</b> - pace at your easy heart rate, from flat easy runs only, so hills never inflate it.</li>
-      <li><b>Cardiac drift</b> - heart-rate rise across a steady flat run, after warm-up. Under 5% means durable endurance.</li>
-    </ul>
-    <p>Behind the plain names are standard sports-science tools: a Banister heart-rate load, acute-to-chronic load ratio and efficiency factor. They stay inside the engine; the interface and the coach never use the jargon.</p>
-    <h3>Race readiness, scored by the weakest link</h3>
-    <p>Two rules of thumb over the last 12 weeks against a target race: longest run (against two thirds of the race distance up to 60 km, and against about 5.5 hours of time on feet for ultras, where the distance rule stops scaling) and biggest climbing week against the race D+. There is no average, because an average hides the problem: the score is the weaker of the two and the card leads with the limiting factor. Climbing speed is shown for context only, since training speed on short fresh climbs is not comparable to race-average speed. The demo uses a fictional race; the owner's real race lives in a server-side setting, never in the browser, so the coach only ever sees server-side data.</p>
+    <header><span class="n">02</span><h2>Metrics before words</h2></header>
+    <div>
+      <p>The coach never reasons over raw GPS files. Each run is first reduced to metrics by one module of pure functions, used both by the app and by the agent's tools:</p>
+      <div class="cards">
+        <div class="card"><b>Load vs usual</b>Heart-rate load of the last 7 days against the average of the 4 weeks before.</div>
+        <div class="card"><b>Easy share</b>Share of running time in heart-rate zones 1 and 2. Around 80% keeps hard days hard.</div>
+        <div class="card"><b>Climbing speed</b>Vertical metres per hour on sustained climbs (50 m or more at 3% or steeper), found from altitude streams.</div>
+        <div class="card"><b>Aerobic engine</b>Pace at easy heart rate, from flat easy runs only, so hills never inflate it.</div>
+      </div>
+      <p>Behind the plain names sit standard tools (Banister load, efficiency factor). They stay in the engine: the interface and the coach speak in words a first-time runner understands.</p>
+    </div>
   </section>
 
   <section>
-    <h2>The coach is an agent, not a completion</h2>
-    <p>One model call decides for itself what it needs. There is no router and no forced tool use: the system prompt carries a cached summary of the athlete's current state (load vs usual, easy share, climbing speed, aerobic engine, last 15 sessions), which answers most questions on its own. For anything beyond that, the model has three tools:</p>
-    <div class="toolcard"><b>list_activities</b><p>Sessions in any date window, filtered by sport. Covers history, specific months and period comparisons.</p></div>
-    <div class="toolcard"><b>get_activity_details</b><p>Second-by-second analysis of one session: zones, kilometre splits, laps, cardiac drift.</p></div>
-    <div class="toolcard"><b>compute_stats</b><p>Deterministic metrics - summary, climbing-speed trend, aerobic-engine trend, weekly volume, race readiness - computed by the same functions the dashboard uses.</p></div>
-    <p>The loop is capped at eight model calls per question, and the final call is always made without tools, so the model must end in a written answer. Live Strava calls are separately budgeted at six per question, which keeps latency and API usage predictable.</p>
-    <h3>Honest progress, live text</h3>
-    <p>The "Fetching activities…" lines in the chat are built only from the model's tool-call blocks - name and inputs - so the interface shows what the agent actually did, never what it claimed it would do. The answer itself is streamed token by token over server-sent events, on top of the agent's steps.</p>
-    <h3>Grounded, not trusted</h3>
-    <p>The browser sends only the conversation text. The server fetches the athlete's data itself, computes the metrics and builds the prompt. A user cannot inject fake training data into the coach's context, and the system prompt requires every recommendation to cite a number from it.</p>
+    <header><span class="n">03</span><h2>A grounded agent</h2></header>
+    <div>
+      <p>The coach is one Claude model (Sonnet) that decides for itself what it needs. The system prompt carries a cached summary of the athlete's state; for anything else it calls tools:</p>
+      <div class="cards">
+        <div class="card"><b><code>list_activities</code></b>Sessions in any date window, filtered by sport.</div>
+        <div class="card"><b><code>get_activity_details</code></b>Second-by-second analysis of one session: zones, splits, laps, cardiac drift.</div>
+        <div class="card"><b><code>compute_stats</code></b>The same deterministic metrics the app shows: weekly volume, trends, race readiness.</div>
+      </div>
+      <p>The loop is capped at eight model calls, and the last one is made without tools so it must end in a written answer. The progress lines in the chat are built from the actual tool calls, never from what the model says it will do.</p>
+      <p><b>Grounding is tested, not hoped for.</b> Every pull request runs 21 questions with known answers against the real model; a validator checks that every current figure in the reply comes from the data and that no cause is claimed without data behind it.</p>
+    </div>
   </section>
 
   <section>
-    <h2>Security and privacy</h2>
-    <ul>
-      <li><b>Secrets never reach the browser.</b> The OAuth exchange and token refresh run server-side. The session is a single AES-256-GCM encrypted cookie (<code>httpOnly</code>, <code>Secure</code>, <code>SameSite=Lax</code>) - stateless, so there is no database of tokens to leak.</li>
-      <li><b>Private context is owner-only.</b> Injury history and goals live in an environment variable and enter the prompt only when the authenticated Strava athlete id matches the owner's. Never committed to the repo, never sent to the browser.</li>
-      <li><b>Defensive defaults.</b> OAuth state check, strict validation of every chat message (roles, alternation, length), model output escaped before rendering, and a restrictive Content-Security-Policy with security headers on every response.</li>
-      <li><b>Cost and abuse controls.</b> The demo runs on the smaller Haiku model with per-IP and global daily rate limits, and the system prompt is cached across turns (prompt caching) so repeated questions stay cheap.</li>
-    </ul>
+    <header><span class="n">04</span><h2>The stack</h2></header>
+    <div>
+      <div class="flow">
+        <div><b>Browser</b>Static HTML, vanilla JS modules, self-hosted fonts. No framework, no build step, no secrets.</div>
+        <div class="hl"><b>Vercel serverless functions (Node)</b>Strava OAuth, encrypted session, plan validation, metrics, agent loop, rate limits.</div>
+        <div><b>Postgres (Neon)</b>The athlete's plan and logged sessions, plus the waitlist. Two small tables, no ORM.</div>
+        <div><b>Strava API · Claude API</b>Activities and streams in; coaching answers out, streamed token by token.</div>
+      </div>
+    </div>
   </section>
 
   <section>
-    <h2>One code path, two athletes</h2>
-    <p>The demo is a fictional athlete: 16 weeks of synthetic but realistic training, generated by a seeded deterministic PRNG into Strava-shaped objects. Because demo and live data share the same shape, the same analytics, prompt builder, agent and UI run on both. The demo isn't a mock - it's the full product, and it doubles as a permanent integration test.</p>
+    <header><span class="n">05</span><h2>Security and cost</h2></header>
+    <div>
+      <ul class="rules">
+        <li><b>Secrets stay on the server.</b> OAuth exchange and token refresh run server-side; the session is one AES-256-GCM encrypted, httpOnly cookie.</li>
+        <li><b>Private context is owner-only.</b> Injury history and goals live in an environment variable and enter the prompt only for the owner's Strava id.</li>
+        <li><b>The browser is never trusted.</b> It sends conversation text only; the server fetches the data, builds the prompt and re-validates every plan change.</li>
+        <li><b>Bounded spend.</b> The public demo is limited per IP and globally per day, with prompt caching: about one cent per question.</li>
+      </ul>
+    </div>
   </section>
 
   <section>
-    <h2>How it's tested</h2>
-    <p>62 unit and integration tests (<code>node:test</code>, no framework) cover the metrics functions, race readiness, the session crypto, and the whole agent loop against a mock model - tool selection, visible-step labels, streaming, budgets and the forced final answer. On top of that, an 11-question evaluation harness (<code>npm run eval</code>) runs real questions through the real model against demo data, checking that the coach reaches for the right tool for each kind of question.</p>
-    <p>Every change ships the same way: a branch, tests green, the Vercel preview checked on desktop and mobile, and only then a merge - the live site is on my CV, so it doesn't break.</p>
+    <header><span class="n">06</span><h2>How it ships</h2></header>
+    <div>
+      <p>The demo is a fictional runner generated by a seeded PRNG into Strava-shaped data, so demo and live share one code path. Every change goes the same way: a branch, tests green, the Vercel preview checked on desktop and mobile, then a merge. The live site is on my CV, so it doesn't break.</p>
+    </div>
   </section>
-
-  <footer class="foot doc-foot">Designed and built by Justin Seriat. <a href="https://github.com/justinseriat15-coder/trail-ai" target="_blank" rel="noopener">Source code</a></footer>
 </main>
 
+<footer><span>Designed and built by Justin Seriat, London.</span><span><a href="https://github.com/justinseriat15-coder/trail-ai">Source code</a> · <a href="/app?mode=demo">Try the demo</a></span></footer>
 </body>
 </html>

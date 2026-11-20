@@ -3,7 +3,7 @@
 // Live mode reads and writes the plan through /api/plan; the server re-checks every change.
 import {
   validateConfig, generatePlan, applyLog, canMove, sessionOn, weekOf, isRunType,
-  addDays, weekday, isoDate, mondayOf, daysBetween, demoConfig, demoLog, EFFORT, DAY_NAMES, DAY_LONG,
+  addDays, weekday, isoDate, matchActivities, mondayOf, daysBetween, demoConfig, demoLog, EFFORT, DAY_NAMES, DAY_LONG,
 } from './plan.js';
 import { loadWatch, watchMetrics } from './watch.js';
 import { mountCoach } from './coach.js';
@@ -87,7 +87,7 @@ async function api(method, body) {
 }
 
 function rebuild() {
-  state.plan = state.config ? applyLog(generatePlan(state.config), state.log) : null;
+  state.plan = state.config ? matchActivities(applyLog(generatePlan(state.config), state.log), state.activities || []) : null;
 }
 
 async function act(body) {
@@ -187,8 +187,8 @@ function sessionActions(s, { onLight = false } = {}) {
   if (s.type === 'rest') return null;
   if (s.done) {
     return h('div', { class: 'done-line' }, OK_SVG(),
-      `Done · ${fmtMin(s.done.minutes)} · felt ${s.done.feel === 'ok' ? 'about right' : s.done.feel}`,
-      h('button', { type: 'button', onclick: () => act({ action: 'undo', date: s.originalDate }) }, 'Undo'));
+      s.done.source === 'strava' ? `Done · ${fmtMin(s.done.minutes)} · ${s.activities?.[0]?.name || 'Strava'}, ${(s.activities.reduce((m, a) => m + (a.distance || 0), 0) / 1000).toFixed(1)} km` : `Done · ${fmtMin(s.done.minutes)} · felt ${s.done.feel === 'ok' ? 'about right' : s.done.feel}`,
+      s.done.source === 'strava' ? null : h('button', { type: 'button', onclick: () => act({ action: 'undo', date: s.originalDate }) }, 'Undo'));
   }
   const canAct = s.date <= addDays(TODAY, 0) || true;
   return h('div', { class: 'actions' },
@@ -294,7 +294,7 @@ function viewPlan() {
     list.append(h('li', { class: cls },
       h('button', { type: 'button', 'aria-expanded': state.expanded === s.date ? 'true' : 'false', 'aria-controls': id, onclick: () => { state.expanded = state.expanded === s.date ? null : s.date; render(); } },
         h('span', { class: 'dn' }, DAY_NAMES[weekday(s.date)], h('em', {}, String(Number(s.date.slice(8))))),
-        h('span', { class: 's' }, s.title, s.moved ? h('span', { class: 'moved-tag' }, 'Moved') : null, h('small', {}, s.type === 'rest' ? (s.why || 'Rest') : `${s.detail || EFFORT[s.effort]?.words || ''}`)),
+        h('span', { class: 's' }, s.title, s.moved ? h('span', { class: 'moved-tag' }, 'Moved') : null, h('small', {}, (() => { const ex = (state.plan.extras || []).find((e) => e.date === s.date); if (ex) return `Extra run from Strava: ${ex.activities[0].name}, ${(ex.activities.reduce((m, a) => m + (a.distance || 0), 0) / 1000).toFixed(1)} km`; return s.type === 'rest' ? (s.why || 'Rest') : `${s.detail || EFFORT[s.effort]?.words || ''}`; })())),
         h('span', { class: 'st' }, st === 'done' ? OK_SVG() : stLabel)),
       h('div', { class: 'open', id },
         s.type !== 'rest' ? effortRow(s) : null,
@@ -472,9 +472,17 @@ async function boot() {
   $('avatar').textContent = state.mode === 'demo' ? 'D' : (me.athlete?.firstname || 'J')[0];
   $('demo-note').hidden = state.mode !== 'demo';
 
+  // Runs from Strava (demo: the fictional runner's watch data) complete planned sessions.
+  const watchP = loadWatch(state.mode).then((d) => { state.activities = d.activities || []; }).catch(() => { state.activities = []; });
   if (state.mode === 'demo') {
     state.config = validateConfig(demoConfig(TODAY)).config;
-    state.log = demoLog(generatePlan(state.config), TODAY);
+    await watchP;
+    // Demo strength sessions have no watch data: keep the synthetic log for those only.
+    const runDays = new Set(state.activities.map((a) => String(a.start_date_local).slice(0, 10)));
+    const synth = demoLog(generatePlan(state.config), TODAY);
+    const plan0 = generatePlan(state.config);
+    const typeOn = new Map(plan0.weeks.flatMap((w) => w.sessions).map((s) => [s.date, s.type]));
+    state.log = { moves: {}, done: Object.fromEntries(Object.entries(synth.done).filter(([d]) => !isRunType(typeOn.get(d)) || (!runDays.has(d) && d < addDays(TODAY, -21)))) };
   } else {
     try {
       const data = await api('GET');
@@ -486,6 +494,7 @@ async function boot() {
         [h('a', { class: 'btn', href: '/app?mode=demo' }, 'Open the demo')]);
     }
   }
+  await watchP;
   rebuild();
   if (state.plan) state.weekIdx = weekOf(state.plan, TODAY)?.index ?? (TODAY < state.plan.weeks[0].start ? 0 : state.plan.weeks.length - 1);
   render();

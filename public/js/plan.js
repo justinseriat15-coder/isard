@@ -321,3 +321,29 @@ export function demoLog(plan, today = isoDate()) {
   });
   return { done, moves: {} };
 }
+
+// ---------- Strava runs → plan sessions ----------
+// A run recorded on the day of a planned run session completes it, unless the athlete
+// already logged it by hand (a manual log always wins). Several runs on one day add up.
+// Runs on days without a planned run are returned as extras, never forced onto a session.
+const STRAVA_RUNS = new Set(['Run', 'TrailRun', 'VirtualRun']);
+export function matchActivities(plan, activities = []) {
+  const byDate = new Map();
+  for (const a of activities) {
+    if (!STRAVA_RUNS.has(a.sport_type || a.type)) continue;
+    const d = String(a.start_date_local || '').slice(0, 10);
+    if (!byDate.has(d)) byDate.set(d, []);
+    byDate.get(d).push(a);
+  }
+  const used = new Set();
+  const weeks = plan.weeks.map((w) => ({ ...w, sessions: w.sessions.map((s) => {
+    const acts = byDate.get(s.date);
+    if (!acts || !isRunType(s.type) || s.type === 'race') return s;
+    used.add(s.date);
+    if (s.done) return { ...s, activities: acts };
+    const minutes = Math.round(acts.reduce((m, a) => m + (a.moving_time || 0), 0) / 60);
+    return { ...s, activities: acts, done: { minutes, feel: 'ok', source: 'strava' } };
+  }) }));
+  const extras = [...byDate.entries()].filter(([d]) => !used.has(d)).map(([date, acts]) => ({ date, activities: acts }));
+  return { ...plan, weeks, extras };
+}

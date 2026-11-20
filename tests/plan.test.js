@@ -135,3 +135,25 @@ test('server action handler re-checks moves and validates input', async () => {
   assert.equal(applyAction(config, {}, { action: 'done', date: thu, minutes: 52, feel: 'hard' }).done[thu].feel, 'hard');
   assert.throws(() => applyAction(config, {}, { action: 'drop', date: thu }), /Unknown/);
 });
+
+test('matchActivities completes planned runs from Strava, manual logs win, extras stay extras', async () => {
+  const { matchActivities } = await import('../public/js/plan.js');
+  const raw = generatePlan(validateConfig(base).config);
+  const week = raw.weeks[2];
+  const tue = addDays(week.start, 1); const thu = addDays(week.start, 3); const sun = addDays(week.start, 6); const mon = week.start;
+  const acts = [
+    { id: 1, sport_type: 'TrailRun', start_date_local: `${tue}T07:10:00Z`, moving_time: 2700 },
+    { id: 2, type: 'Run', start_date_local: `${tue}T18:00:00Z`, moving_time: 900 },
+    { id: 3, type: 'Run', start_date_local: `${thu}T07:00:00Z`, moving_time: 3000 },
+    { id: 4, type: 'Run', start_date_local: `${sun}T09:00:00Z`, moving_time: 1800 },
+    { id: 5, type: 'Ride', start_date_local: `${mon}T08:00:00Z`, moving_time: 1800 },
+  ];
+  const logged = applyLog(raw, { done: { [thu]: { minutes: 55, feel: 'hard' } } });
+  const p = matchActivities(logged, acts);
+  const s = (d) => sessionOn(p, d).session;
+  assert.deepEqual(s(tue).done, { minutes: 60, feel: 'ok', source: 'strava' });
+  assert.equal(s(thu).done.minutes, 55);
+  assert.equal(s(thu).done.feel, 'hard');
+  assert.equal(s(mon).done, null);
+  assert.deepEqual(p.extras.map((e) => e.date), [sun]);
+});

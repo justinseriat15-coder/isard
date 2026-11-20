@@ -13,5 +13,5 @@ export default handler(['GET'], async (req, res) => {
   const t = await exchangeCode(code).catch(() => null);
   if (!t) return redirect(res, '/?auth=exchange_failed');
   writeSession(res, sessionFromToken(t, t.athlete));
-  redirect(res, '/?mode=live');
+  redirect(res, '/app?mode=live');
 });

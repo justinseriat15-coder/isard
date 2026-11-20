@@ -13,6 +13,7 @@
     "eval:grounding": "node --test tests/eval-grounding.test.js"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.137.0"
+    "@anthropic-ai/sdk": "^0.137.0",
+    "@neondatabase/serverless": "^1.2.1"
   }
 }

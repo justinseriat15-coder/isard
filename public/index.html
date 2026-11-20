@@ -88,7 +88,7 @@ h1,h2,h3,p{margin:0}
 /* ---------------- Hero ---------------- */
 .hero{position:relative;min-height:100svh;min-height:640px;height:100svh;overflow:hidden;isolation:isolate;color:var(--bone)}
 @supports(height:100svh){.hero{min-height:620px}}
-.hero-media{position:absolute;inset:-6% 0 0;z-index:-2;will-change:transform;background:#3d4a5a}
+.hero-media{position:absolute;inset:0;z-index:-2;background:#3d4a5a}
 .hero-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:40% 70%}
 @media(max-width:699px){.hero-media{background:linear-gradient(180deg,#5d82c4 0%,#6a8fd0 100%)}.hero-media img{top:22%;height:78%;object-position:50% 0%;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 8%);mask-image:linear-gradient(180deg,transparent 0,#000 8%)}}
 .hero-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%}
@@ -199,7 +199,7 @@ h1,h2,h3,p{margin:0}
 
 /* ---------------- Manifesto: still from the hero footage ---------------- */
 .manifesto{position:relative;min-height:100svh;display:flex;align-items:flex-start;overflow:hidden;isolation:isolate}
-.manifesto .media{position:absolute;inset:-8% 0;z-index:-2;background:#1e2533 url(/media/manifesto.webp) 52% 60%/cover no-repeat;will-change:transform}
+.manifesto .media{position:absolute;inset:0;z-index:-2;background:#1e2533 url(/media/manifesto.webp) 52% 60%/cover no-repeat;}
 @media(max-width:699px){.manifesto .media{background-image:url(/media/manifesto-m.webp);background-position:50% 50%}}
 .manifesto .media::after{content:"";position:absolute;inset:0;opacity:.14;mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
@@ -531,16 +531,16 @@ footer a:hover{color:var(--bone)}
    One warm off-white page. Photos and dark moments live inside rounded cards
    inset from the edges, so the page never "switches colour" edge to edge.
    Pastels (peach, sage, sand) for the occasional highlighted card. */
-:root{--peach:#F6DCCD;--sage:#DCE5D6;--sand:#ECE5D8;--radius-xl:32px}
+:root{--peach:#F4DFCB;--sage:#DCE5D6;--sand:#ECE5D8;--radius-xl:32px}
 body{background:var(--paper);color:var(--ink)}
 .light,.how,.product,.cred{background:var(--paper);color:var(--ink)}
 .folio{border-bottom:0;padding:clamp(56px,7vw,96px) 0 0}
 .folio .label{color:var(--stone-d)}
 .dark .folio .label:last-child,.folio .label:last-child{color:var(--stone-d)}
 /* hero: rounded foot, sits on the page instead of cutting it */
-.hero{border-radius:0 0 var(--radius-xl) var(--radius-xl)}
+.hero{border-radius:0 0 var(--radius-xl) var(--radius-xl);overflow:hidden}
 /* full-bleed photo sections become inset cards */
-.manifesto,.mono,.join{margin:16px var(--pad);border-radius:var(--radius-xl);min-height:min(86svh,820px)}
+.manifesto,.mono,.join{margin:16px var(--pad);border-radius:var(--radius-xl);min-height:min(86svh,820px);overflow:hidden;isolation:isolate;transform:translateZ(0)}
 .manifesto .media{inset:0}
 .join{min-height:min(92svh,860px)}
 /* bento: one dark card, one pastel card, one photo card */
@@ -573,7 +573,7 @@ footer a:hover{color:var(--ink)}
 .sync-pill .mn{background:var(--ink)}
 .programs{background:var(--paper);padding-bottom:clamp(40px,6vw,80px)}
 .programs h2{font-size:clamp(2.6rem,7vw,5.6rem);margin-top:clamp(32px,5vw,56px);max-width:14ch}
-.prog-row{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;margin:clamp(28px,4vw,48px) calc(var(--pad) * -1) 0;padding:4px var(--pad) 16px;scrollbar-width:none}
+.prog-row{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:var(--pad);-webkit-overflow-scrolling:touch;margin:clamp(28px,4vw,48px) calc(var(--pad) * -1) 0;padding:4px var(--pad) 16px;scrollbar-width:none}
 .prog-row::-webkit-scrollbar{display:none}
 .prog{position:relative;flex:0 0 min(78vw,340px);aspect-ratio:4/5;border-radius:28px;overflow:hidden;scroll-snap-align:start;text-decoration:none;color:#fff;isolation:isolate;display:flex;align-items:flex-end}
 .prog img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;transition:transform .8s var(--ease)}
@@ -588,11 +588,13 @@ footer a:hover{color:var(--ink)}
 .prog-own .prog-t{order:-1}
 @media(min-width:900px){.prog-row{margin-inline:0;padding-inline:0}.prog{flex-basis:calc((100% - 48px) / 4)}}
 @media(prefers-reduced-motion:reduce){.prog img{transition:none}}
+.join .folio .label,.join .folio .label:last-child{color:rgba(236,230,218,.85)}
+@media(max-width:899px){.prog{scroll-snap-align:center}.prog-row{scroll-padding-inline:0}}
+@media (hover:none){.hero-grain,.manifesto .media::after,.mono::after{display:none}}
 </style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<div class="grain" aria-hidden="true"></div>
 
 <header class="nav">
   <div class="wrap">

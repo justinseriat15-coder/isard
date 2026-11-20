@@ -318,7 +318,7 @@ fieldset.form legend{float:left;width:100%;margin:0 0 4px;padding:0;font:700 .95
 @media (prefers-reduced-motion:reduce){.msg.typing i{animation:none;opacity:.6}}
 
 /* ---------- v2: pastels, goal page, regularity, volume, richer sessions ---------- */
-:root{--peach:#F6DCCD;--sage:#DCE5D6;--done:#9FC6A3;--sand:#ECE5D8}
+:root{--peach:#F4DFCB;--sage:#DCE5D6;--done:#9FC6A3;--sand:#ECE5D8}
 a.togo{text-decoration:none;color:inherit}
 a.togo:hover b{color:var(--accent)}
 .goal-hero{position:relative;border-radius:28px;overflow:hidden;color:#fff;min-height:min(62svh,560px);display:flex;flex-direction:column;justify-content:space-between;
@@ -368,7 +368,7 @@ a.togo:hover b{color:var(--accent)}
 .l-band{background:var(--sage)}.l-in{background:var(--good);border-radius:50%!important}.l-out{background:#E0A35A;border-radius:50%!important}.l-now{background:var(--accent);border-radius:50%!important}
 .watch .sec-head h2{font:700 1.25rem/1.2 var(--ui);text-transform:none;letter-spacing:-.01em}
 /* plan rows */
-.key{display:inline-block;background:var(--peach);color:#8A3A16;font:700 .64rem/1 var(--ui);letter-spacing:.06em;text-transform:uppercase;padding:5px 8px;border-radius:999px;margin-right:8px;vertical-align:2px}
+.key{display:inline-block;background:var(--peach);color:#8A4114;font:700 .64rem/1 var(--ui);letter-spacing:.06em;text-transform:uppercase;padding:5px 8px;border-radius:999px;margin-right:8px;vertical-align:2px}
 .day.is-today .key{background:rgba(246,220,205,.2);color:#F6DCCD}
 .facts{display:flex;align-items:center;gap:10px;margin-top:4px;font:600 .8rem/1 var(--ui);color:var(--muted)}
 .day.is-today .facts{color:var(--card-muted)}
@@ -387,8 +387,8 @@ a.togo:hover b{color:var(--accent)}
 .delta.up{background:var(--sage)}
 .delta.down{background:var(--peach)}
 /* softer highlights: no black bars in lists */
-.day.is-today{background:#FBF1EA;color:var(--text)}
-.day.is-today > button:hover{background:#F8E9DF}
+.day.is-today{background:#FBF2E8;color:var(--text)}
+.day.is-today > button:hover{background:#F8EBDD}
 .day.is-today .dn,.day.is-today .s small,.day.is-today .st,.day.is-today .facts{color:var(--muted)}
 .day.is-today .dn em{color:var(--text)}
 .day.is-today .effort span:last-child{color:var(--muted)}
@@ -399,5 +399,5 @@ a.togo:hover b{color:var(--accent)}
 .day.is-today .st{color:var(--accent);font-weight:700}
 .season .peak{background:#4A4945;color:#fff}
 .linkout{background:var(--peach);color:var(--text)}
-.linkout:hover{background:#F2D1BF}
-.linkout span{color:#6b4a3a}
+.linkout:hover{background:#EFD5BC}
+.linkout span{color:#6b4e36}

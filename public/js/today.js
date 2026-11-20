@@ -3,7 +3,7 @@
 // Live mode reads and writes the plan through /api/plan; the server re-checks every change.
 import {
   validateConfig, generatePlan, applyLog, canMove, sessionOn, weekOf, isRunType,
-  addDays, weekday, isoDate, matchActivities, regularity, isKeySession, sessionDifficulty, estimateKm, mondayOf, daysBetween, demoConfig, demoLog, EFFORT, DAY_NAMES, DAY_LONG,
+  addDays, weekday, isoDate, matchActivities, demoLogFor, regularity, isKeySession, sessionDifficulty, estimateKm, mondayOf, daysBetween, demoConfig, demoLog, EFFORT, DAY_NAMES, DAY_LONG,
 } from './plan.js';
 import { loadWatch, watchMetrics } from './watch.js';
 import { mountCoach } from './coach.js';
@@ -542,12 +542,7 @@ async function boot() {
   if (state.mode === 'demo') {
     state.config = validateConfig(demoConfig(TODAY)).config;
     await watchP;
-    // Demo strength sessions have no watch data: keep the synthetic log for those only.
-    const runDays = new Set(state.activities.map((a) => String(a.start_date_local).slice(0, 10)));
-    const synth = demoLog(generatePlan(state.config), TODAY);
-    const plan0 = generatePlan(state.config);
-    const typeOn = new Map(plan0.weeks.flatMap((w) => w.sessions).map((s) => [s.date, s.type]));
-    state.log = { moves: {}, done: Object.fromEntries(Object.entries(synth.done).filter(([d]) => !isRunType(typeOn.get(d)) || (!runDays.has(d) && d < addDays(TODAY, -21)))) };
+    state.log = demoLogFor(state.config, state.activities, TODAY);
   } else {
     try {
       const data = await api('GET');

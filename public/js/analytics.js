@@ -577,7 +577,7 @@ export const ULTRA_FROM_KM = 60;
 export const TIME_ON_FEET_H = 5.5;
 export const isUltra = (race) => race.distanceKm > ULTRA_FROM_KM;
 // Fictional race, used for the demo only. hours = target moving time (display only).
-export const DEMO_RACE = { name: 'fictional 50K', distanceKm: 50, dplusM: 2500, hours: 7 };
+export const DEMO_RACE = { name: 'Trail des Crêtes (fictional)', distanceKm: 50, dplusM: 2500, hours: 7 };
 
 // Validate a race target from any source (the RACE_TARGET env var).
 // Accepts { name, km, dplus, hours } or the long key names. Returns a clean

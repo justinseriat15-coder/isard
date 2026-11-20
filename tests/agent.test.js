@@ -248,7 +248,7 @@ test('compute_stats race_readiness: demo uses the fictional race, live without a
   const demo = demoCtx();
   demo.race = DEMO_RACE;
   const out = await executeTool(demo, 'compute_stats', { metric: 'race_readiness' }, budget());
-  assert.equal(out.race.name, 'fictional 50K');
+  assert.equal(out.race.name, 'Trail des Crêtes (fictional)');
   assert.ok(out.limiting.label);
   assert.equal(out.parts.distance.need, 33);
   assert.equal(out.parts.climb, undefined);

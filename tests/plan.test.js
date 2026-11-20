@@ -188,3 +188,17 @@ test('regularity counts done vs due and adds extras', async () => {
   assert.ok(r.due >= 8);
   assert.equal(r.columns[2].cells.every((c) => c === 'planned'), true);
 });
+
+test('coach plan context: demo plan matches the app and lists today', async () => {
+  const { loadPlan, planLines } = await import('../lib/plan-context.js');
+  const today = '2026-11-20';
+  const { demoConfig, demoLogFor, matchActivities: match } = await import('../public/js/plan.js');
+  const acts = [{ type: 'Run', start_date_local: '2026-11-17T07:00:00Z', moving_time: 2700 }];
+  const p = await loadPlan({ mode: 'demo', activities: acts }, today);
+  const app = match(applyLog(generatePlan(validateConfig(demoConfig(today)).config), demoLogFor(validateConfig(demoConfig(today)).config, acts, today)), acts);
+  assert.deepEqual(p.weeks.map((w) => w.sessions.map((s) => !!s.done)), app.weeks.map((w) => w.sessions.map((s) => !!s.done)));
+  const lines = planLines(p, today).join('\n');
+  assert.match(lines, /TODAY/);
+  assert.match(lines, /never two run days in a row/);
+  assert.match(planLines(null).join(' '), /No training plan/);
+});

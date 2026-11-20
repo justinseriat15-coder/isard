@@ -385,3 +385,14 @@ export function regularity(plan, today) {
   const done = due.filter((c) => c === 'done').length;
   return { columns, done, due: due.length, pct: due.length ? Math.round((done / due.length) * 100) : null };
 }
+
+// Demo log shared by the app and the coach, so both see the same week: runs come from the
+// fictional runner's watch data; strength sessions (no watch data) keep the synthetic log;
+// runs older than three weeks without watch data keep it too.
+export function demoLogFor(config, activities = [], today = isoDate()) {
+  const plan = generatePlan(config);
+  const synth = demoLog(plan, today);
+  const runDays = new Set(activities.map((a) => String(a.start_date_local).slice(0, 10)));
+  const typeOn = new Map(plan.weeks.flatMap((w) => w.sessions).map((s) => [s.date, s.type]));
+  return { moves: {}, done: Object.fromEntries(Object.entries(synth.done).filter(([d]) => !isRunType(typeOn.get(d)) || (!runDays.has(d) && d < addDays(today, -21)))) };
+}

@@ -5,6 +5,8 @@ import {
   validateConfig, generatePlan, applyLog, canMove, sessionOn, weekOf, isRunType,
   addDays, weekday, isoDate, mondayOf, daysBetween, demoConfig, demoLog, EFFORT, DAY_NAMES, DAY_LONG,
 } from './plan.js';
+import { loadWatch, watchMetrics } from './watch.js';
+import { mountCoach } from './coach.js';
 
 const $ = (id) => document.getElementById(id);
 const TODAY = isoDate();
@@ -354,19 +356,38 @@ function viewProgress() {
   el.append(h('div', { class: 'chart' }, h('p', { class: 'label' }, 'Running hours per week'), svg,
     h('div', { class: 'legend label' }, h('span', {}, h('i', { style: 'box-shadow:inset 0 0 0 1px rgba(17,17,16,.35)' }), 'Planned'), h('span', {}, h('i', { style: 'background:#3C7A4D' }), 'Done'), h('span', {}, h('i', { style: 'background:#F0602F' }), 'This week'))));
 
-  el.append(h('a', { class: 'linkout', href: `/analysis?mode=${state.mode}` },
-    h('div', {}, h('b', {}, 'Detailed analysis'), h('span', {}, state.mode === 'demo' ? 'Load, easy share, climbing speed and aerobic engine, from the demo runner’s watch data.' : 'Load, easy share, climbing speed and aerobic engine, from your Strava data.')),
-    h('span', { class: 'arr', 'aria-hidden': 'true' }, '→')));
+  const watch = h('section', { class: 'watch', 'aria-labelledby': 'h-watch' },
+    h('div', { class: 'sec-head' }, h('h2', { id: 'h-watch' }, 'From your watch'), h('span', { class: 'label' }, state.mode === 'demo' ? 'Demo runner · Strava data' : 'Strava')),
+    h('p', { class: 'loading' }, 'Reading your runs…'));
+  el.append(watch);
+  loadWatch(state.mode).then((data) => {
+    const m = watchMetrics(data);
+    watch.querySelector('.loading').remove();
+    watch.append(
+      h('div', { class: 'wtiles' }, ...m.tiles.map((x) => h('div', { class: `wtile${x.tone ? ` t-${x.tone}` : ''}` },
+        h('span', {}, x.k), h('b', {}, x.v), h('em', {}, x.sub), x.note ? h('p', {}, x.note) : null))),
+      h('div', { class: 'runs' }, h('h3', {}, 'Recent runs'),
+        h('ul', {}, ...m.recent.map((r) => h('li', {},
+          h('span', { class: 'r-date' }, r.date), h('span', { class: 'r-name' }, r.name),
+          h('span', { class: 'r-n' }, r.dist), h('span', { class: 'r-n' }, r.time), h('span', { class: 'r-n hide-s' }, r.dplus), h('span', { class: 'r-n hide-s' }, r.pace))))),
+      h('a', { class: 'linkout', href: '#coach', onclick: () => { state.coachPrefill = 'Look at my last week of runs: what stands out, and what should I change?'; } },
+        h('div', {}, h('b', {}, 'Ask the coach'), h('span', {}, 'It reads these runs and only quotes numbers it can find in them.')),
+        h('span', { class: 'arr', 'aria-hidden': 'true' }, '→')));
+  }).catch((e) => { watch.querySelector('.loading').textContent = `Could not load your runs: ${e.message}`; });
+  if (state.mode === 'live') el.append(h('div', { class: 'actions' }, h('button', { class: 'btn ghost small', type: 'button', onclick: async () => { await fetch('/api/auth/logout', { method: 'POST' }); location.href = '/'; } }, 'Disconnect Strava')));
 }
 
 function viewCoach() {
   const el = $('view-coach');
-  el.replaceChildren();
-  const asks = ['Why is Saturday so long this week?', 'My left knee feels tight. Should I change anything?', 'Was my last long run too fast?', 'Am I on track for race day?'];
-  el.append(h('div', { class: 'view-head' }, h('div', {}, h('p', { class: 'label kick' }, 'AI coach · grounded in your data'), h('h1', { class: 'display', id: 'h-coach' }, 'Coach'))),
-    h('p', { class: 'coach-intro' }, 'The plan already says why each session is there. When you want more, ask. The coach reads your runs and only quotes numbers it can find in them.'),
-    h('ul', { class: 'coach-asks' }, ...asks.map((q) => h('li', {}, h('a', { href: `/analysis?mode=${state.mode}&ask=${encodeURIComponent(q)}#coach` }, q)))),
-    h('div', { class: 'actions' }, h('a', { class: 'btn', href: `/analysis?mode=${state.mode}#coach` }, 'Open the coach')));
+  if (el.dataset.ready !== state.mode) {
+    el.replaceChildren(
+      h('div', { class: 'view-head' }, h('div', {}, h('p', { class: 'label kick' }, 'AI coach · grounded in your runs'), h('h1', { class: 'display', id: 'h-coach' }, 'Coach'))),
+      h('div', { id: 'coach-root' }));
+    el.dataset.ready = state.mode;
+  }
+  const asks = ['Am I on track for race day?', 'Was my last long run too easy or too hard?', 'Why is my easy share below target?', 'My left knee feels tight. What should I change?'];
+  mountCoach($('coach-root'), state.mode, { suggestions: asks, prefill: state.coachPrefill || '' });
+  state.coachPrefill = '';
 }
 
 function viewSetup() {

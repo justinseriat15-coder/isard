@@ -46,5 +46,12 @@
       "maxDuration": 60
     }
   },
-  "cleanUrls": true
+  "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/analysis",
+      "destination": "/app",
+      "permanent": false
+    }
+  ]
 }

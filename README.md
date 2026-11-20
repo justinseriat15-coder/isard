@@ -2,7 +2,7 @@
 
 Trail and ultra training plans that explain themselves, with endurance analytics on Strava data and an LLM coach that only reasons over metrics computed server-side.
 
-**Pages:** `/` landing · `/app` the plan (Today, Plan, Progress, Coach) · `/analysis` detailed analysis and coach chat.
+**Pages:** `/` landing · `/app` the app: Today, Plan, Progress (plan + watch metrics), Coach (the grounded AI coach).
 
 ## The plan engine
 
@@ -55,7 +55,8 @@ flowchart LR
 public/            static frontend (vanilla JS + Chart.js)
   js/analytics.js  pure metric functions, shared by browser and server
   js/demo-data.js  deterministic synthetic athlete (seeded PRNG, Strava-shaped)
-  js/app.js        UI
+  js/watch.js      watch metrics for Progress (analytics.js on /api/activities)
+  js/coach.js      coach chat (streams /api/chat)
 api/               serverless endpoints
   auth/login       → Strava consent, CSRF state cookie
   auth/callback    → code exchange server-side, encrypted session

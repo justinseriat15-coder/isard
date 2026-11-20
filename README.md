@@ -1,4 +1,4 @@
-# Isard (Trail.AI)
+# Isard
 
 Trail and ultra training plans that explain themselves, with endurance analytics on Strava data and an LLM coach that only reasons over metrics computed server-side.
 
@@ -15,7 +15,7 @@ Trail and ultra training plans that explain themselves, with endurance analytics
 
 Plans and logged sessions are stored in Postgres (Neon, `DATABASE_URL`) via `/api/plan`. The demo builds its plan in the browser and saves nothing.
 
-**Live:** https://trail-dashboard-one.vercel.app · **Demo:** [/app?mode=demo](https://trail-dashboard-one.vercel.app/app?mode=demo) (fictional runner) · **[How it's built](https://trail-dashboard-one.vercel.app/how-its-built)**
+**Live:** https://isard.vercel.app · **Demo:** [/app?mode=demo](https://isard.vercel.app/app?mode=demo) (fictional runner) · **[How it's built](https://isard.vercel.app/how-its-built)**
 
 ## What it does
 

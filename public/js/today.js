@@ -1,4 +1,4 @@
-// Trail.AI app: Today, Plan, Progress, Coach.
+// Isard app: Today, Plan, Progress, Coach.
 // Demo runs entirely in the browser (fictional runner, nothing saved).
 // Live mode reads and writes the plan through /api/plan; the server re-checks every change.
 import {
